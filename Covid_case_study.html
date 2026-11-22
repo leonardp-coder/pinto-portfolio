@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="pinto-intro.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Azure COVID-19 Data Platform | Pinto Leonard</title>
+<meta name="description" content="An end-to-end Azure data engineering case study by Pinto Leonard.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#050505;
+  --s1:#0c0c0d;
+  --ink:#f4f4f5;
+  --muted:#8b8b93;
+  --silver:#d4d4d8;
+  --line:rgba(255,255,255,.09);
+  --line2:rgba(255,255,255,.17);
+  --card:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.012)),#0b0b0c;
+  --card-hover:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.02)),#101012;
+  --fade:linear-gradient(180deg,#fff 25%,#6c6c73);
+  --max:1160px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font:400 16px/1.65 Inter,-apple-system,BlinkMacSystemFont,sans-serif;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* Square Grid Background & Radial Ambient Glow matching index.html */
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-2;
+  background:
+    linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px) 0 0/64px 64px,
+    linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px) 0 0/64px 64px;
+  -webkit-mask-image:radial-gradient(ellipse at 50% 25%,#000 15%,transparent 75%);
+  mask-image:radial-gradient(ellipse at 50% 25%,#000 15%,transparent 75%);
+}
+body:after{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:
+    radial-gradient(60% 45% at 50% 0,rgba(255,255,255,.11),transparent 70%),
+    radial-gradient(40% 40% at 88% 55%,rgba(190,195,210,.07),transparent 70%);
+}
+
+a{color:inherit;text-decoration:none}
+a:focus-visible,button:focus-visible{outline:2px solid #fff;outline-offset:4px;border-radius:10px}
+h1,h2,h3,.brand,.font-display{font-family:"Inter Tight",Inter,sans-serif;font-weight:600;line-height:1.08}
+
+.wrap{width:min(var(--max),calc(100% - 44px));margin:auto}
+
+/* Scroll Progress Bar */
+#bar{
+  position:fixed;
+  top:0;
+  left:0;
+  height:2px;
+  width:100%;
+  background:#fff;
+  transform-origin:left;
+  transform:scaleX(0);
+  z-index:50;
+}
+
+/* Sticky Pill Navigation */
+header{position:sticky;top:12px;z-index:30;margin-top:12px}
+nav{
+  min-height:58px;
+  padding:0 9px 0 24px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  background:rgba(14,14,15,.72);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  border:1px solid var(--line);
+  border-radius:999px;
+}
+.brand{font-size:21px;letter-spacing:-.04em}
+nav ul{display:flex;gap:24px;list-style:none}
+nav ul a{font-size:14px;font-weight:500;color:var(--muted);transition:color .2s}
+nav ul a:hover,nav ul a.active{color:#fff}
+.nav-cta{
+  font-size:14px;
+  font-weight:600;
+  color:#050505;
+  background:#fff;
+  padding:10px 18px;
+  border-radius:999px;
+  transition:box-shadow .25s;
+  white-space:nowrap;
+}
+.nav-cta:hover{box-shadow:0 0 26px rgba(255,255,255,.45)}
+
+/* Pills & Badges */
+.pill{
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  padding:6px 14px;
+  border:1px solid var(--line2);
+  border-radius:999px;
+  background:rgba(255,255,255,.05);
+  font-size:12.5px;
+  font-weight:500;
+  color:var(--silver);
+  margin-bottom:20px;
+}
+.pill-dot{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 0 9px #fff;
+  animation:ping 1.8s infinite;
+}
+@keyframes ping{
+  70%{box-shadow:0 0 0 10px rgba(255,255,255,0)}
+  100%{box-shadow:0 0 0 0 rgba(255,255,255,0)}
+}
+
+/* Hero Split Layout */
+.hero{padding:76px 0 84px}
+.hero-split{
+  display:grid;
+  grid-template-columns:1.15fr .85fr;
+  gap:44px;
+  align-items:center;
+  margin-bottom:54px;
+}
+.hero h1{
+  font-size:clamp(38px,5.2vw,64px);
+  letter-spacing:-.045em;
+  margin-bottom:20px;
+}
+.gradient{
+  background:linear-gradient(180deg,#d9d9de,#5f5f66);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+.hero-lead{
+  color:var(--muted);
+  font-size:17px;
+  line-height:1.7;
+  margin-bottom:26px;
+  max-width:580px;
+}
+.tech-stack{display:flex;flex-wrap:wrap;gap:9px}
+.tech-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 15px;
+  border-radius:999px;
+  background:var(--card);
+  border:1px solid var(--line);
+  font-size:13px;
+  font-weight:500;
+  color:var(--silver);
+  transition:transform .25s,border-color .25s,box-shadow .25s;
+}
+.tech-chip:hover{
+  border-color:rgba(255,255,255,.35);
+  transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(255,255,255,.08);
+}
+
+/* Floating Glass Telemetry Cards (Square/Rounded Card Aesthetic, No Dotted Rings) */
+.floating-stage{
+  position:relative;
+  height:400px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.float-grid-frame{
+  position:absolute;
+  width:290px;
+  height:290px;
+  border-radius:28px;
+  border:1px solid var(--line);
+  background:radial-gradient(circle,rgba(255,255,255,.06),transparent 70%);
+  transform:rotate(12deg);
+}
+.float-grid-frame-2{
+  position:absolute;
+  width:220px;
+  height:220px;
+  border-radius:22px;
+  border:1px solid var(--line2);
+  transform:rotate(-8deg);
+}
+.float-card{
+  position:absolute;
+  background:rgba(14,14,16,.88);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  border:1px solid var(--line2);
+  border-radius:18px;
+  padding:16px 20px;
+  box-shadow:0 20px 45px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.08);
+  transition:transform .3s ease,border-color .3s ease;
+}
+.float-card:hover{border-color:#fff;z-index:10}
+.fc-main{
+  width:265px;
+  z-index:4;
+  border-color:rgba(255,255,255,.32);
+  animation:levitateMain 6s ease-in-out infinite;
+}
+.fc-top-left{top:12px;left:0;width:205px;z-index:3;animation:levitateAlt1 7s ease-in-out infinite}
+.fc-top-right{top:26px;right:0;width:195px;z-index:3;animation:levitateAlt2 6.5s ease-in-out infinite}
+.fc-bottom-left{bottom:16px;left:10px;width:210px;z-index:5;animation:levitateAlt2 7.5s ease-in-out infinite}
+.fc-bottom-right{bottom:10px;right:6px;width:205px;z-index:4;animation:levitateAlt1 6.8s ease-in-out infinite}
+
+@keyframes levitateMain{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes levitateAlt1{0%,100%{transform:translate(0,0)}50%{transform:translate(5px,-12px)}}
+@keyframes levitateAlt2{0%,100%{transform:translate(0,0)}50%{transform:translate(-5px,10px)}}
+
+.fc-tag{
+  font-family:"JetBrains Mono",monospace;
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  color:var(--muted);
+  display:block;
+  margin-bottom:4px;
+}
+.fc-title{font-family:"Inter Tight",sans-serif;font-size:16.5px;font-weight:600;color:#fff}
+.fc-sub{font-size:12.5px;color:var(--muted);margin-top:2px}
+
+/* KPI Grid */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.kpi-card{
+  position:relative;
+  padding:24px 22px;
+  border-radius:22px;
+  background:var(--card);
+  border:1px solid var(--line);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+  transition:transform .35s cubic-bezier(.16,1,.3,1),border-color .3s;
+}
+.kpi-card:hover{transform:translateY(-6px);border-color:var(--line2)}
+.kpi-value{
+  font-family:"Inter Tight",sans-serif;
+  font-size:36px;
+  font-weight:700;
+  letter-spacing:-.04em;
+  color:#fff;
+  display:block;
+  margin-bottom:4px;
+}
+.kpi-label{font-size:13.5px;color:var(--muted);font-weight:500}
+
+/* Sections */
+section{padding:84px 0;border-top:1px solid var(--line)}
+.section-head{max-width:740px;margin-bottom:40px}
+.section-head h2{
+  font-size:clamp(30px,4.2vw,46px);
+  letter-spacing:-.04em;
+  margin-bottom:12px;
+  background:var(--fade);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+.section-head p{color:var(--muted);font-size:16.5px;line-height:1.7}
+
+/* Cards & Grids */
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:22px;
+  padding:28px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+  transition:transform .35s cubic-bezier(.16,1,.3,1),border-color .3s,background .3s;
+}
+.card:hover{transform:translateY(-6px);border-color:var(--line2);background:var(--card-hover)}
+.card h3{font-size:20px;letter-spacing:-.025em;margin-bottom:14px;color:#fff;display:flex;align-items:center;gap:10px}
+.card p{color:var(--muted);font-size:15px;line-height:1.7}
+
+.styled-list{list-style:none;display:flex;flex-direction:column;gap:11px}
+.styled-list li{position:relative;padding-left:20px;color:var(--muted);font-size:14.5px;line-height:1.65}
+.styled-list li::before{content:"→";position:absolute;left:0;color:var(--silver);font-weight:600}
+.styled-list strong{color:var(--ink)}
+
+.callout-box{
+  margin-top:18px;
+  padding:16px 20px;
+  border-radius:14px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--line2);
+  border-left:3px solid #fff;
+  color:var(--silver);
+  font-size:14px;
+  line-height:1.65;
+}
+
+/* Architecture Pipeline (matching index.html pipeline nodes) */
+.architecture-box{
+  background:var(--card);
+  border:1px solid var(--line2);
+  border-radius:28px;
+  padding:36px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+}
+.pipeline-grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:22px;
+  position:relative;
+}
+.pipe-node{
+  position:relative;
+  padding:22px 16px;
+  border:1px solid var(--line2);
+  background:rgba(0,0,0,.55);
+  border-radius:18px;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  transition:transform .25s,border-color .25s;
+}
+.pipe-node:hover{transform:translateY(-6px);border-color:#fff}
+.pipe-step{
+  font-family:"JetBrains Mono",monospace;
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:.1em;
+  color:var(--silver);
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--line);
+  padding:3px 10px;
+  border-radius:999px;
+}
+.pipe-icon{font-size:24px;margin:2px 0}
+.pipe-node strong{font-family:"Inter Tight",sans-serif;font-size:15.5px;color:#fff}
+.pipe-node small{font-size:12.5px;color:var(--muted);line-height:1.45}
+.pipe-node:not(:last-child)::after{
+  content:"";
+  position:absolute;
+  left:100%;
+  top:50%;
+  width:22px;
+  height:1px;
+  background:linear-gradient(90deg,#fff,transparent);
+}
+
+.governance-banner{
+  margin-top:24px;
+  padding:22px 26px;
+  border-radius:18px;
+  background:rgba(255,255,255,.035);
+  border:1px solid var(--line2);
+  display:flex;
+  align-items:center;
+  gap:18px;
+}
+.gov-badge{
+  flex-shrink:0;
+  width:48px;
+  height:48px;
+  border-radius:14px;
+  background:rgba(255,255,255,.07);
+  border:1px solid var(--line2);
+  display:grid;
+  place-items:center;
+  font-size:22px;
+}
+
+/* Medallion Lake Layers */
+.medallion-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.medallion-card{
+  border-radius:22px;
+  padding:28px;
+  background:var(--card);
+  border:1px solid var(--line);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+  transition:transform .35s ease,border-color .3s;
+}
+.medallion-card:hover{transform:translateY(-6px);border-color:var(--line2)}
+.layer-tag{
+  display:inline-block;
+  font-family:"JetBrains Mono",monospace;
+  font-size:11.5px;
+  font-weight:600;
+  letter-spacing:.1em;
+  color:var(--silver);
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--line);
+  padding:4px 10px;
+  border-radius:999px;
+  margin-bottom:14px;
+}
+.medallion-card h3{font-size:20px;margin-bottom:10px;color:#fff}
+.medallion-card p{color:var(--muted);font-size:14.5px;margin-bottom:18px}
+.path-tags{display:flex;flex-direction:column;gap:8px}
+.path-tag{
+  font-family:"JetBrains Mono",monospace;
+  font-size:12.5px;
+  padding:8px 12px;
+  border-radius:10px;
+  background:rgba(0,0,0,.55);
+  border:1px solid var(--line);
+  color:var(--silver);
+}
+
+/* Charts & Data Visualization */
+.charts-grid{display:grid;grid-template-columns:1.35fr 1fr;gap:18px;margin-bottom:20px}
+.chart-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:22px;
+  padding:26px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+}
+.chart-header{margin-bottom:18px}
+.chart-header h3{font-size:18px;margin-bottom:4px;color:#fff}
+.chart-header p{font-size:13.5px;color:var(--muted)}
+.chart-canvas-wrap{position:relative;height:280px;width:100%}
+
+/* Table Styling */
+.table-container{
+  overflow-x:auto;
+  border-radius:22px;
+  border:1px solid var(--line);
+  background:var(--card);
+}
+.data-table{width:100%;border-collapse:collapse;min-width:620px}
+.data-table th{
+  text-align:left;
+  padding:15px 20px;
+  font-family:"JetBrains Mono",monospace;
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--silver);
+  background:rgba(255,255,255,.04);
+  border-bottom:1px solid var(--line);
+}
+.data-table td{
+  padding:14px 20px;
+  border-bottom:1px solid var(--line);
+  font-size:14.5px;
+  color:var(--muted);
+}
+.data-table td strong{color:var(--ink)}
+.data-table tbody tr:hover{background:rgba(255,255,255,.03)}
+.data-table tbody tr:last-child{background:rgba(255,255,255,.06);font-weight:600}
+.data-table tbody tr:last-child td{color:#fff;border-bottom:none}
+
+.pill-type{
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:500;
+  border:1px solid var(--line2);
+}
+.pill-fact{background:rgba(255,255,255,.09);color:#fff}
+.pill-dim{background:rgba(255,255,255,.03);color:var(--silver)}
+.pill-total{background:#fff;color:#050505;font-weight:600}
+
+/* Challenges */
+.challenge-card{display:flex;gap:18px;align-items:flex-start}
+.challenge-num{
+  flex-shrink:0;
+  width:46px;
+  height:46px;
+  border-radius:14px;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--line2);
+  display:grid;
+  place-items:center;
+  font-family:"JetBrains Mono",monospace;
+  font-weight:600;
+  font-size:14px;
+  color:#fff;
+}
+code{
+  font-family:"JetBrains Mono",monospace;
+  font-size:13px;
+  padding:2px 6px;
+  border-radius:6px;
+  background:rgba(255,255,255,.07);
+  color:#fff;
+}
+
+/* Interactive Prompt Tabs */
+.prompt-tabs{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.tab-btn{
+  padding:10px 18px;
+  border-radius:999px;
+  background:var(--card);
+  border:1px solid var(--line);
+  color:var(--muted);
+  font-family:Inter,sans-serif;
+  font-size:13.5px;
+  font-weight:500;
+  cursor:pointer;
+  transition:all .2s ease;
+}
+.tab-btn:hover{color:#fff;border-color:var(--line2)}
+.tab-btn.active{
+  background:#fff;
+  border-color:#fff;
+  color:#050505;
+  font-weight:600;
+}
+.prompt-panel{display:none}
+.prompt-panel.active{display:block;animation:fadeSlideIn .3s ease forwards}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.terminal-box{
+  margin-top:16px;
+  background:#070708;
+  border:1px solid var(--line2);
+  border-radius:16px;
+  overflow:hidden;
+}
+.terminal-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:11px 18px;
+  background:rgba(255,255,255,.04);
+  border-bottom:1px solid var(--line);
+}
+.terminal-title{
+  font-family:"JetBrains Mono",monospace;
+  font-size:12.5px;
+  color:var(--silver);
+}
+.copy-btn{
+  padding:6px 14px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  border:1px solid var(--line2);
+  color:#fff;
+  font-size:12.5px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all .2s;
+}
+.copy-btn:hover{background:#fff;color:#050505}
+.terminal-box pre{
+  padding:20px;
+  font-family:"JetBrains Mono",monospace;
+  font-size:13px;
+  line-height:1.7;
+  color:var(--silver);
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+
+.workflow-strip{
+  margin-top:20px;
+  padding:18px 22px;
+  border-radius:18px;
+  background:var(--card);
+  border:1px solid var(--line);
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.wf-step{
+  font-family:"JetBrains Mono",monospace;
+  font-size:12.5px;
+  padding:6px 12px;
+  border-radius:8px;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--line);
+  color:var(--ink);
+}
+.wf-arrow{color:var(--muted);font-weight:600}
+
+/* CTA Banner matching index.html contact card */
+.cta-box{
+  position:relative;
+  overflow:hidden;
+  background:radial-gradient(60% 120% at 80% 0,rgba(255,255,255,.12),transparent 70%),var(--card);
+  border:1px solid var(--line2);
+  border-radius:28px;
+  padding:44px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:25px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.1);
+}
+.cta-box h2{
+  font-size:32px;
+  letter-spacing:-.035em;
+  margin-bottom:8px;
+  background:var(--fade);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+.cta-box p{color:var(--muted);max-width:580px}
+.btn-primary{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  padding:13px 22px;
+  border-radius:999px;
+  font-weight:600;
+  font-size:14px;
+  background:#fff;
+  color:#050505;
+  box-shadow:0 8px 30px rgba(255,255,255,.18);
+  white-space:nowrap;
+  transition:transform .25s,box-shadow .25s;
+}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(255,255,255,.35)}
+
+/* Footer matching index.html */
+footer{padding:35px 0 0;color:var(--muted);font-size:13px;border-top:1px solid var(--line);overflow:hidden}
+.footer-row{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.footer-links{display:flex;gap:20px;font-weight:500}
+.footer-links a:hover{color:#fff}
+.mark{
+  font:700 clamp(70px,17vw,230px)/.85 "Inter Tight";
+  letter-spacing:-.06em;
+  text-align:center;
+  margin-top:34px;
+  height:.62em;
+  overflow:hidden;
+  white-space:nowrap;
+  background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0) 85%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  user-select:none;
+}
+
+#top-btn{
+  position:fixed;
+  right:22px;
+  bottom:22px;
+  width:46px;
+  height:46px;
+  border-radius:50%;
+  border:1px solid var(--line2);
+  background:rgba(16,16,17,.85);
+  backdrop-filter:blur(10px);
+  color:#fff;
+  font-size:20px;
+  cursor:pointer;
+  z-index:40;
+  opacity:0;
+  transform:translateY(20px);
+  pointer-events:none;
+  transition:.35s;
+}
+#top-btn.show{opacity:1;transform:none;pointer-events:auto}
+#top-btn:hover{background:#fff;color:#050505}
+
+/* Reveal Animations */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
+.reveal.visible{opacity:1;transform:none}
+.stagger-1{transition-delay:.08s}.stagger-2{transition-delay:.16s}.stagger-3{transition-delay:.24s}.stagger-4{transition-delay:.32s}
+
+@media(prefers-reduced-motion:reduce){
+  *{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}
+  .reveal{opacity:1;transform:none}
+}
+@media(max-width:1024px){
+  .hero-split{grid-template-columns:1fr;gap:32px}
+  .floating-stage{height:340px;max-width:540px;margin:0 auto;width:100%}
+}
+@media(max-width:900px){
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .pipeline-grid{grid-template-columns:1fr}
+  .pipe-node:not(:last-child)::after{display:none}
+  .medallion-grid,.grid-2,.charts-grid{grid-template-columns:1fr}
+  .cta-box{flex-direction:column;align-items:flex-start;padding:30px}
+}
+@media(max-width:620px){
+  .wrap{width:calc(100% - 32px)}
+  nav{padding-left:18px}
+  nav ul{display:none}
+  .hero{padding:44px 0 40px}
+  .floating-stage{height:auto;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .float-grid-frame,.float-grid-frame-2{display:none}
+  .float-card{position:static;width:100%;animation:none}
+  .fc-main{grid-column:span 2}
+  .kpi-grid{grid-template-columns:1fr}
+  section{padding:64px 0}
+  .governance-banner{flex-direction:column;align-items:flex-start}
+  .footer-row{display:block}
+  .footer-links{margin-top:13px}
+  #top-btn{right:14px;bottom:14px}
+}
+</style>
+</head>
+<body>
+
+<div id="bar"></div>
+<button id="top-btn" aria-label="Back to top">↑</button>
+
+<header>
+  <div class="wrap">
+    <nav aria-label="Main navigation">
+      <a class="brand" href="index.html#top">Pinto<span>.</span></a>
+      <ul>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#architecture">Architecture</a></li>
+        <li><a href="#layers">Lakehouse</a></li>
+        <li><a href="#model">Data Model</a></li>
+        <li><a href="#challenges">Challenges</a></li>
+        <li><a href="#prompts">AI Workflow</a></li>
+      </ul>
+      <a class="nav-cta" href="Project.html">← All Projects</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- HERO -->
+  <div class="hero wrap" id="overview">
+    <div class="hero-split">
+      <div class="reveal">
+        <div class="pill"><span class="pill-dot"></span> Azure Cloud Data Engineering · Case Study</div>
+        <h1>COVID-19 Data Platform<br><span class="gradient">From raw files to analytics-ready intelligence.</span></h1>
+        <p class="hero-lead">An end-to-end cloud engineering build exploring automated ingestion, medallion lakehouse architecture, PySpark transformations, dimensional star-schema modelling, and Unity Catalog governance across Azure services.</p>
+
+        <div class="tech-stack">
+          <span class="tech-chip">⚡ Azure Data Factory</span>
+          <span class="tech-chip">🗄️ ADLS Gen2</span>
+          <span class="tech-chip">🔥 Azure Databricks</span>
+          <span class="tech-chip">🐍 PySpark</span>
+          <span class="tech-chip">🛡️ Unity Catalog</span>
+          <span class="tech-chip">📐 Dimensional Modelling</span>
+          <span class="tech-chip">📦 Parquet</span>
+        </div>
+      </div>
+
+      <!-- Floating Glass Telemetry Cards Cluster (Square Frame Geometry) -->
+      <div class="floating-stage reveal stagger-2" id="floatingStage">
+        <div class="float-grid-frame"></div>
+        <div class="float-grid-frame-2"></div>
+
+        <div class="float-card fc-top-left" data-depth="0.04">
+          <span class="fc-tag">INGESTION</span>
+          <div class="fc-title">Azure Data Factory</div>
+          <div class="fc-sub">Multi-domain Copy &amp; Data Flows</div>
+        </div>
+
+        <div class="float-card fc-top-right" data-depth="-0.03">
+          <span class="fc-tag">GOVERNANCE</span>
+          <div class="fc-title">Unity Catalog</div>
+          <div class="fc-sub">External Locations &amp; Volumes</div>
+        </div>
+
+        <div class="float-card fc-main" data-depth="0.02">
+          <span class="fc-tag">GOLD STAR SCHEMA</span>
+          <div class="fc-title">77,943 Validated Rows</div>
+          <div class="fc-sub">4 Fact Tables · 3 Conformed Dimensions · Parquet</div>
+        </div>
+
+        <div class="float-card fc-bottom-left" data-depth="-0.04">
+          <span class="fc-tag">COMPUTE ENGINE</span>
+          <div class="fc-title">Databricks PySpark</div>
+          <div class="fc-sub">Daily &amp; Weekly Grain Isolation</div>
+        </div>
+
+        <div class="float-card fc-bottom-right" data-depth="0.03">
+          <span class="fc-tag">LAKEHOUSE STORAGE</span>
+          <div class="fc-title">ADLS Gen2 Medallion</div>
+          <div class="fc-sub">Landing → Processed → Curated</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card reveal stagger-1">
+        <span class="kpi-value counter" data-target="4">0</span>
+        <span class="kpi-label">Curated Fact Datasets</span>
+      </div>
+      <div class="kpi-card reveal stagger-2">
+        <span class="kpi-value counter" data-target="3">0</span>
+        <span class="kpi-label">Conformed Dimensions</span>
+      </div>
+      <div class="kpi-card reveal stagger-3">
+        <span class="kpi-value counter" data-target="77943">0</span>
+        <span class="kpi-label">Total Gold Records</span>
+      </div>
+      <div class="kpi-card reveal stagger-4">
+        <span class="kpi-value counter" data-target="7">0</span>
+        <span class="kpi-label">Validated Parquet Exports</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 01 CONTEXT -->
+  <section id="problem">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="pill">01 · The Engineering Challenge</div>
+        <h2>Why build this platform?</h2>
+        <p>Public health datasets span multiple clinical and demographic domains, arriving in heterogeneous formats and conflicting time grains. The objective was to architect a repeatable, governed pipeline capable of turning raw multi-grain feeds into unified analytical tables.</p>
+      </div>
+
+      <div class="grid-2">
+        <article class="card reveal stagger-1">
+          <h3>🎯 Core Engineering Objectives</h3>
+          <ul class="styled-list">
+            <li>Automate ingestion of cases/deaths, hospital admissions, and population feeds.</li>
+            <li>Structure cloud storage cleanly by business domain and processing maturity.</li>
+            <li>Standardize inconsistent schemas, delimiters, and date formats into reliable tables.</li>
+            <li>Integrate multi-grain facts around shared, reusable dimension tables.</li>
+            <li>Audit and verify persisted record counts prior to downstream consumption.</li>
+          </ul>
+        </article>
+
+        <article class="card reveal stagger-2">
+          <h3>🧭 Scope &amp; Architectural Approach</h3>
+          <p>Orchestrate ingestion workflows with <strong>Azure Data Factory</strong>, persist raw and curated data in <strong>ADLS Gen2</strong>, execute distributed transformations using <strong>Azure Databricks &amp; PySpark</strong>, and govern storage access via <strong>Unity Catalog</strong>.</p>
+          <div class="callout-box">
+            <strong>Authenticity Note:</strong> This case study documents real architectural decisions, troubleshooting breakthroughs, and validated pipeline outputs from the build—without inflated or synthetic production metrics.
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 ARCHITECTURE -->
+  <section id="architecture">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="pill">02 · System Topology</div>
+        <h2>End-to-end architecture at a glance</h2>
+        <p>Every service plays a specialized role in the lifecycle. Unity Catalog operates as an overarching governance control plane rather than an inline compute step.</p>
+      </div>
+
+      <div class="architecture-box reveal">
+        <div class="pipeline-grid">
+          <div class="pipe-node">
+            <span class="pipe-step">01 · SOURCE</span>
+            <div class="pipe-icon">🌐</div>
+            <strong>COVID Feeds</strong>
+            <small>Cases/Deaths · Hospital · Population</small>
+          </div>
+          <div class="pipe-node">
+            <span class="pipe-step">02 · INGEST</span>
+            <div class="pipe-icon">⚙️</div>
+            <strong>Data Factory</strong>
+            <small>Copy Activities &amp; Mapping Data Flows</small>
+          </div>
+          <div class="pipe-node">
+            <span class="pipe-step">03 · STORE</span>
+            <div class="pipe-icon">☁️</div>
+            <strong>ADLS Gen2</strong>
+            <small>Landing · Processed · Curated Zones</small>
+          </div>
+          <div class="pipe-node">
+            <span class="pipe-step">04 · COMPUTE</span>
+            <div class="pipe-icon">⚡</div>
+            <strong>Databricks</strong>
+            <small>PySpark Cleansing, Joins &amp; Modelling</small>
+          </div>
+          <div class="pipe-node">
+            <span class="pipe-step">05 · SERVE</span>
+            <div class="pipe-icon">📊</div>
+            <strong>Gold Layer</strong>
+            <small>Star-Schema Parquet for Analytics</small>
+          </div>
+        </div>
+
+        <div class="governance-banner">
+          <div class="gov-badge">🛡️</div>
+          <div>
+            <h3 style="margin-bottom:6px;font-size:18px;color:#fff">Unity Catalog · Cross-Cutting Governance Plane</h3>
+            <p style="color:var(--muted);font-size:14.5px">Spanning storage and compute layers, Unity Catalog centralizes metadata discovery and identity-based access control—utilizing Storage Credentials, External Locations, and Volumes instead of legacy DBFS mounts.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 MEDALLION LAYERS -->
+  <section id="layers">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="pill">03 · Data Lakehouse Design</div>
+        <h2>Domain-oriented Medallion organization</h2>
+        <p>Storage directories were refactored from flat tutorial folders into clean, domain-partitioned layers to preserve lineage and isolate reporting grains.</p>
+      </div>
+
+      <div class="medallion-grid">
+        <article class="medallion-card reveal stagger-1">
+          <span class="layer-tag">BRONZE · LANDING</span>
+          <h3>Preserve Raw Lineage</h3>
+          <p>Immutable source files partitioned by subject domain so ingestion runs remain traceable, auditable, and easy to replay.</p>
+          <div class="path-tags">
+            <div class="path-tag">landing/cases_deaths</div>
+            <div class="path-tag">landing/hospital_admissions</div>
+            <div class="path-tag">landing/population</div>
+          </div>
+        </article>
+
+        <article class="medallion-card reveal stagger-2">
+          <span class="layer-tag">SILVER · PROCESSED</span>
+          <h3>Standardize &amp; Isolate Grains</h3>
+          <p>Cleaned, typed intermediate datasets. Daily and weekly hospital feeds are strictly separated to prevent grain-mixing errors.</p>
+          <div class="path-tags">
+            <div class="path-tag">processed/hospital_admissions/daily</div>
+            <div class="path-tag">processed/hospital_admissions/weekly</div>
+          </div>
+        </article>
+
+        <article class="medallion-card reveal stagger-3">
+          <span class="layer-tag">GOLD · CURATED</span>
+          <h3>Analytics-Ready Star Schema</h3>
+          <p>Conformed fact and dimension tables persisted in columnar Parquet format, ready for high-speed BI querying.</p>
+          <div class="path-tags">
+            <div class="path-tag">curated/cases_deaths</div>
+            <div class="path-tag">curated/hospital_admissions</div>
+            <div class="path-tag">curated/population</div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 DATA MODEL & CHARTS -->
+  <section id="model">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="pill">04 · Gold Dimensional Model &amp; Telemetry</div>
+        <h2>Star schema volume &amp; composition</h2>
+        <p>The Gold layer integrates four fact tables across three conformed dimensions (Country, Date, Age Group), totaling <strong>77,943 validated records</strong> across 7 Parquet datasets.</p>
+      </div>
+
+      <!-- Visual Charts Row -->
+      <div class="charts-grid reveal">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>Record Volume by Gold Dataset</h3>
+            <p>Log-scaled comparison highlighting disparity between daily fact tables and compact dimensions</p>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="barChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>Gold Layer Composition</h3>
+            <p>Share of total persisted records (77,943 rows)</p>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="donutChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dimensions & Facts Summary Cards -->
+      <div class="grid-2 reveal" style="margin-bottom:20px">
+        <article class="card">
+          <h3>📐 Conformed Dimensions (515 rows)</h3>
+          <ul class="styled-list">
+            <li><strong>dim_country</strong> — 211 rows (ISO codes, country names, regional attributes)</li>
+            <li><strong>dim_date</strong> — 298 rows (Calendar hierarchy, week/month/year keys)</li>
+            <li><strong>dim_age_group</strong> — 6 rows (Standardized demographic brackets)</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>📈 Fact Tables (77,428 rows)</h3>
+          <ul class="styled-list">
+            <li><strong>fact_cases_deaths</strong> — 64,635 rows (Daily country-level epidemiological counts)</li>
+            <li><strong>fact_hospital_daily</strong> — 8,110 rows (Daily inpatient &amp; ICU occupancy metrics)</li>
+            <li><strong>fact_population_age</strong> — 3,816 rows (Baseline demographic distribution by country)</li>
+            <li><strong>fact_hospital_weekly</strong> — 867 rows (Weekly aggregated hospital admission rates)</li>
+          </ul>
+        </article>
+      </div>
+
+      <!-- Validation Table -->
+      <div class="table-container reveal">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Gold Dataset</th>
+              <th>Table Type</th>
+              <th>Granularity / Keys</th>
+              <th>Validated Records</th>
+              <th>Share of Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>COVID daily cases &amp; deaths</strong></td>
+              <td><span class="pill-type pill-fact">Fact</span></td>
+              <td>Country × Date</td>
+              <td>64,635</td>
+              <td>82.93%</td>
+            </tr>
+            <tr>
+              <td><strong>Hospital admissions — daily</strong></td>
+              <td><span class="pill-type pill-fact">Fact</span></td>
+              <td>Country × Date</td>
+              <td>8,110</td>
+              <td>10.40%</td>
+            </tr>
+            <tr>
+              <td><strong>Population by age group</strong></td>
+              <td><span class="pill-type pill-fact">Fact</span></td>
+              <td>Country × Age Group</td>
+              <td>3,816</td>
+              <td>4.90%</td>
+            </tr>
+            <tr>
+              <td><strong>Hospital admissions — weekly</strong></td>
+              <td><span class="pill-type pill-fact">Fact</span></td>
+              <td>Country × Week</td>
+              <td>867</td>
+              <td>1.11%</td>
+            </tr>
+            <tr>
+              <td><strong>Date</strong></td>
+              <td><span class="pill-type pill-dim">Dimension</span></td>
+              <td>Calendar Day</td>
+              <td>298</td>
+              <td>0.38%</td>
+            </tr>
+            <tr>
+              <td><strong>Country</strong></td>
+              <td><span class="pill-type pill-dim">Dimension</span></td>
+              <td>Country / Territory</td>
+              <td>211</td>
+              <td>0.27%</td>
+            </tr>
+            <tr>
+              <td><strong>Age Group</strong></td>
+              <td><span class="pill-type pill-dim">Dimension</span></td>
+              <td>Age Bracket</td>
+              <td>6</td>
+              <td>0.01%</td>
+            </tr>
+            <tr>
+              <td><strong>Total Gold Layer</strong></td>
+              <td><span class="pill-type pill-total">7 Parquet Datasets</span></td>
+              <td>Star Schema</td>
+              <td>77,943</td>
+              <td>100.00%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout-box reveal">
+        <strong>Validation Integrity:</strong> All counts reflect verified pipeline outputs from the engineering walkthrough and should be cross-checked against final repository notebook runs prior to release.
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 REAL-WORLD CHALLENGES -->
+  <section id="challenges">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="pill">05 · Engineering in the Trenches</div>
+        <h2>Real-world bottlenecks &amp; how I solved them</h2>
+        <p>Production data engineering rarely follows a straight tutorial path. These six architectural hurdles required root-cause investigation and modern Azure adaptation.</p>
+      </div>
+
+      <div class="grid-2">
+        <article class="card challenge-card reveal stagger-1">
+          <div class="challenge-num">01</div>
+          <div>
+            <h3>Schema &amp; File Format Drift</h3>
+            <p>Source feeds varied across delimiters, column naming conventions, and date encodings. I profiled each raw feed individually, isolated ingestion paths by domain, and enforced explicit schema casting in PySpark.</p>
+          </div>
+        </article>
+
+        <article class="card challenge-card reveal stagger-2">
+          <div class="challenge-num">02</div>
+          <div>
+            <h3>Conflicting Time Grains (Daily vs. Weekly)</h3>
+            <p>Hospital metrics arrived at both daily and weekly cadences. To prevent double-counting or cartesian fan-out, I segregated daily and weekly pipelines in the Silver layer and modeled distinct Gold fact tables.</p>
+          </div>
+        </article>
+
+        <article class="card challenge-card reveal stagger-1">
+          <div class="challenge-num">03</div>
+          <div>
+            <h3>Deprecated DBFS Mount Restrictions</h3>
+            <p>Legacy tutorial patterns relied on <code>dbfs:/mnt</code> mounts unsupported in modern workspaces. I re-architected storage access using Unity Catalog Storage Credentials, External Locations, and managed Volumes.</p>
+          </div>
+        </article>
+
+        <article class="card challenge-card reveal stagger-2">
+          <div class="challenge-num">04</div>
+          <div>
+            <h3>Storage Authorization &amp; Path Scoping</h3>
+            <p>Permission errors revealed tight coupling between managed identities, RBAC roles, and External Location URL prefixes. I audited credential bindings and aligned directory scopes across ADLS containers.</p>
+          </div>
+        </article>
+
+        <article class="card challenge-card reveal stagger-1">
+          <div class="challenge-num">05</div>
+          <div>
+            <h3>Refactoring Flat Lake Directories</h3>
+            <p>Replacing ad-hoc tutorial paths with domain-aligned <code>landing/</code>, <code>processed/</code>, and <code>curated/</code> hierarchies improved discoverability, simplified RBAC policies, and clarified data lineage.</p>
+          </div>
+        </article>
+
+        <article class="card challenge-card reveal stagger-2">
+          <div class="challenge-num">06</div>
+          <div>
+            <h3>End-to-End Output Reconciliation</h3>
+            <p>Rather than trusting green pipeline runs blindly, I built explicit post-write validation checks verifying Parquet schema integrity and exact row counts across all 7 Gold tables.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 AI-ASSISTED WORKFLOW -->
+  <section id="prompts">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="pill">06 · AI-Augmented Engineering</div>
+        <h2>Structured prompting as a force multiplier</h2>
+        <p>I leveraged AI as a technical peer to accelerate PySpark design, diagnose Unity Catalog errors, and evaluate architectural trade-offs—treating every output as a hypothesis verified against live workspace telemetry.</p>
+      </div>
+
+      <div class="reveal">
+        <div class="prompt-tabs" role="tablist">
+          <button class="tab-btn active" onclick="switchPrompt(0, this)">01 · Implementation</button>
+          <button class="tab-btn" onclick="switchPrompt(1, this)">02 · Root-Cause Debugging</button>
+          <button class="tab-btn" onclick="switchPrompt(2, this)">03 · Spark Optimization</button>
+          <button class="tab-btn" onclick="switchPrompt(3, this)">04 · Architecture Review</button>
+        </div>
+
+        <!-- Panel 0 -->
+        <div class="prompt-panel active card" id="panel-0">
+          <h3>Implementation &amp; Schema-Safe Transformation Prompt</h3>
+          <p>Used to plan modular PySpark transformations with explicit edge-case handling and zero hallucinated column names.</p>
+          <div class="terminal-box">
+            <div class="terminal-header">
+              <span class="terminal-title">implementation_prompt.txt</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copy Prompt</button>
+            </div>
+            <pre>Act as a senior Azure Data Engineer. I am working in Azure Databricks with PySpark and Unity Catalog. Explain the design first, then help me implement this transformation step-by-step. Preserve the source columns unless a change is justified. Include assumptions, schema handling, edge cases, and a small validation block. Do not invent column names—ask me for the schema if it is missing.</pre>
+          </div>
+        </div>
+
+        <!-- Panel 1 -->
+        <div class="prompt-panel card" id="panel-1">
+          <h3>Targeted Debugging &amp; Governance Diagnosis Prompt</h3>
+          <p>Used to isolate Unity Catalog permission and path-scoping errors without falling back to deprecated DBFS mounts.</p>
+          <div class="terminal-box">
+            <div class="terminal-header">
+              <span class="terminal-title">debugging_prompt.txt</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copy Prompt</button>
+            </div>
+            <pre>Help me debug this Azure Databricks / Unity Catalog error. First explain what the error means in plain language. Identify the likely cause and distinguish confirmed facts from hypotheses. Review my code and configuration, suggest the smallest safe change, and give verification steps. Do not propose deprecated DBFS mount methods unless I explicitly ask.
+
+ERROR:
+&lt;paste exact error&gt;
+
+CODE / CONFIG:
+&lt;paste relevant snippet, redact secrets&gt;</pre>
+          </div>
+        </div>
+
+        <!-- Panel 2 -->
+        <div class="prompt-panel card" id="panel-2">
+          <h3>Pragmatic PySpark Performance Optimization Prompt</h3>
+          <p>Used to evaluate shuffle overhead, partitioning, and unnecessary actions proportional to actual dataset scale.</p>
+          <div class="terminal-box">
+            <div class="terminal-header">
+              <span class="terminal-title">optimization_prompt.txt</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copy Prompt</button>
+            </div>
+            <pre>Review this PySpark transformation for performance and maintainability. Explain the current execution pattern, identify likely bottlenecks, and recommend improvements only where they are justified. Consider partitioning, shuffle, joins, filtering, file sizes, and unnecessary actions. Provide an optimized version, explain each change, and suggest how I can measure before/after performance. Do not assume the dataset is large enough to require complex tuning.
+
+CODE:
+&lt;paste code&gt;
+
+DATA / EXECUTION CONTEXT:
+&lt;row count, schema, current runtime, observed bottleneck&gt;</pre>
+          </div>
+        </div>
+
+        <!-- Panel 3 -->
+        <div class="prompt-panel card" id="panel-3">
+          <h3>Cloud Architecture Trade-Off Review Prompt</h3>
+          <p>Used to contrast tutorial shortcuts against modern enterprise Azure patterns across security, cost, and maintainability.</p>
+          <div class="terminal-box">
+            <div class="terminal-header">
+              <span class="terminal-title">architecture_review_prompt.txt</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copy Prompt</button>
+            </div>
+            <pre>Act as a cloud data platform architect. Compare the two approaches I am considering for this Azure Databricks project. Evaluate security, governance, maintainability, cost, complexity, and fit for a learning portfolio. Give a recommendation, explain why, list implementation steps, and call out what is tutorial-specific versus current best practice. Ask for missing workspace details before giving environment-specific instructions.
+
+OPTIONS / CONTEXT:
+&lt;describe choices&gt;</pre>
+          </div>
+        </div>
+
+        <div class="workflow-strip">
+          <span style="font-weight:600;color:#fff;font-size:13px">VERIFICATION LOOP:</span>
+          <span class="wf-step">1. Supply Context</span>
+          <span class="wf-arrow">→</span>
+          <span class="wf-step">2. Structured Prompt</span>
+          <span class="wf-arrow">→</span>
+          <span class="wf-step">3. Critical Review</span>
+          <span class="wf-arrow">→</span>
+          <span class="wf-step">4. Sandbox Execution</span>
+          <span class="wf-arrow">→</span>
+          <span class="wf-step">5. Row-Count Audit</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 LEARNINGS & ROADMAP -->
+  <section id="learnings">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="pill">07 · Takeaways &amp; Roadmap</div>
+        <h2>Engineering growth &amp; next milestones</h2>
+      </div>
+
+      <div class="grid-2">
+        <article class="card reveal stagger-1">
+          <h3>🚀 Core Capabilities Strengthened</h3>
+          <ul class="styled-list">
+            <li>Structuring multi-domain data lakes with clear Bronze/Silver/Gold boundaries.</li>
+            <li>Orchestrating hybrid pipelines across Azure Data Factory and Databricks.</li>
+            <li>Writing clean, maintainable PySpark transformations for dimensional star schemas.</li>
+            <li>Navigating modern Unity Catalog governance when legacy patterns fall short.</li>
+            <li>Enforcing post-pipeline data validation before exposing tables to analysts.</li>
+          </ul>
+        </article>
+
+        <article class="card reveal stagger-2">
+          <h3>🔭 Future Platform Extensions</h3>
+          <ul class="styled-list">
+            <li>Implement automated Great Expectations / Delta Live Tables quality assertions.</li>
+            <li>Parameterize ADF pipelines for metadata-driven incremental ingestion.</li>
+            <li>Introduce watermark-based CDC and idempotent retry recovery logic.</li>
+            <li>Build an interactive Power BI semantic model directly on top of the Gold layer.</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section>
+    <div class="wrap">
+      <div class="cta-box reveal">
+        <div>
+          <div class="pill">Source Code &amp; Notebooks</div>
+          <h2>Explore the codebase &amp; notebooks</h2>
+          <p>Inspect the PySpark transformation notebooks, ADF pipeline definitions, and lakehouse structure directly on GitHub.</p>
+        </div>
+        <a class="btn-primary" href="https://github.com/leonardp-coder/azure-covid-data-platform" target="_blank" rel="noopener">
+          View Repository on GitHub ↗
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap footer-row">
+    <span>© 2026 Pinto Leonard · Azure COVID-19 Data Engineering Case Study</span>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="mailto:pintoleonarrd@gmail.com">Email</a>
+      <a href="https://www.linkedin.com/in/pinto-leonard-aa7b202b5" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="https://github.com/datajutsu-jpl" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+  <div class="mark" aria-hidden="true">Pinto Leonard</div>
+</footer>
+
+<script>
+// 1. Scroll Progress Bar & Back to Top Button
+const bar = document.getElementById('bar'), tb = document.getElementById('top-btn');
+window.addEventListener('scroll', () => {
+  bar.style.transform = `scaleX(${scrollY / (document.documentElement.scrollHeight - innerHeight || 1)})`;
+  tb.classList.toggle('show', scrollY > 600);
+}, { passive: true });
+tb.onclick = () => scrollTo({ top: 0 });
+
+// Active nav link highlight on scroll
+const navLinks = [...document.querySelectorAll('nav ul a')];
+const sectionObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + entry.target.id));
+    }
+  });
+}, { rootMargin: '-45% 0px -50% 0px' });
+document.querySelectorAll('[id]').forEach(el => {
+  if (navLinks.some(a => a.getAttribute('href') === '#' + el.id)) sectionObserver.observe(el);
+});
+
+// 2. Interactive Parallax on Floating Hero Cards
+const stage = document.getElementById('floatingStage');
+if (stage && window.matchMedia('(min-width: 621px)').matches) {
+  stage.addEventListener('mousemove', (e) => {
+    const rect = stage.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+    stage.querySelectorAll('.float-card').forEach(card => {
+      const depth = parseFloat(card.getAttribute('data-depth') || 0.03);
+      card.style.marginLeft = `${x * depth}px`;
+      card.style.marginTop = `${y * depth}px`;
+    });
+  });
+  stage.addEventListener('mouseleave', () => {
+    stage.querySelectorAll('.float-card').forEach(card => {
+      card.style.marginLeft = '0px';
+      card.style.marginTop = '0px';
+    });
+  });
+}
+
+// 3. Intersection Observer for Reveal Animations & Animated Counters
+const animateCounter = (el) => {
+  const target = +el.getAttribute('data-target');
+  const duration = 1400;
+  const startTime = performance.now();
+
+  const update = (now) => {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = Math.floor(eased * target);
+    el.textContent = current.toLocaleString();
+    if (progress < 1) {
+      requestAnimationFrame(update);
+    } else {
+      el.textContent = target.toLocaleString();
+    }
+  };
+  requestAnimationFrame(update);
+};
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      const counter = entry.target.querySelector('.counter');
+      if (counter && !counter.dataset.animated) {
+        counter.dataset.animated = 'true';
+        animateCounter(counter);
+      }
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.14 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// 4. Interactive Prompt Tabs & Clipboard Copy
+function switchPrompt(index, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.prompt-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-' + index).classList.add('active');
+}
+
+function copyPrompt(btn) {
+  const text = btn.closest('.terminal-box').querySelector('pre').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const old = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    btn.style.background = '#fff';
+    btn.style.color = '#050505';
+    setTimeout(() => {
+      btn.textContent = old;
+      btn.style.background = '';
+      btn.style.color = '';
+    }, 1500);
+  }).catch(() => {
+    btn.textContent = 'Select & Copy';
+  });
+}
+
+// 5. Monochrome Silver/White Chart.js Visualizations
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof Chart === 'undefined') return;
+
+  Chart.defaults.color = '#8b8b93';
+  Chart.defaults.font.family = "'Inter', sans-serif";
+
+  const barCtx = document.getElementById('barChart').getContext('2d');
+  new Chart(barCtx, {
+    type: 'bar',
+    data: {
+      labels: [
+        'Cases & Deaths (Fact)',
+        'Hospital Daily (Fact)',
+        'Population Age (Fact)',
+        'Hospital Weekly (Fact)',
+        'Date (Dim)',
+        'Country (Dim)',
+        'Age Group (Dim)'
+      ],
+      datasets: [{
+        label: 'Validated Records',
+        data: [64635, 8110, 3816, 867, 298, 211, 6],
+        backgroundColor: [
+          'rgba(255, 255, 255, 0.88)',
+          'rgba(212, 212, 216, 0.72)',
+          'rgba(161, 161, 170, 0.62)',
+          'rgba(113, 113, 122, 0.55)',
+          'rgba(255, 255, 255, 0.35)',
+          'rgba(212, 212, 216, 0.25)',
+          'rgba(161, 161, 170, 0.2)'
+        ],
+        borderColor: 'rgba(255, 255, 255, 0.5)',
+        borderWidth: 1,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(12, 12, 13, 0.96)',
+          borderColor: 'rgba(255, 255, 255, 0.2)',
+          borderWidth: 1,
+          padding: 12,
+          callbacks: {
+            label: (ctx) => ` ${ctx.raw.toLocaleString()} records`
+          }
+        }
+      },
+      scales: {
+        x: {
+          type: 'logarithmic',
+          grid: { color: 'rgba(255, 255, 255, 0.06)' },
+          ticks: {
+            callback: (val) => [1, 10, 100, 1000, 10000, 100000].includes(val) ? val.toLocaleString() : ''
+          }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { color: '#d4d4d8', font: { size: 12, weight: '500' } }
+        }
+      }
+    }
+  });
+
+  const donutCtx = document.getElementById('donutChart').getContext('2d');
+  new Chart(donutCtx, {
+    type: 'doughnut',
+    data: {
+      labels: [
+        'Cases & Deaths (82.9%)',
+        'Hospital Daily (10.4%)',
+        'Population Age (4.9%)',
+        'Hospital Weekly (1.1%)',
+        'Dimensions (0.7%)'
+      ],
+      datasets: [{
+        data: [64635, 8110, 3816, 867, 515],
+        backgroundColor: [
+          '#ffffff',
+          '#a1a1aa',
+          '#71717a',
+          '#3f3f46',
+          '#27272a'
+        ],
+        borderColor: '#0b0b0c',
+        borderWidth: 3,
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '66%',
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: {
+            color: '#d4d4d8',
+            padding: 14,
+            usePointStyle: true,
+            pointStyle: 'rectRounded',
+            font: { size: 12 }
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(12, 12, 13, 0.96)',
+          borderColor: 'rgba(255, 255, 255, 0.2)',
+          borderWidth: 1,
+          padding: 12,
+          callbacks: {
+            label: (ctx) => ` ${ctx.label.split(' (')[0]}: ${ctx.raw.toLocaleString()} rows`
+          }
+        }
+      }
+    }
+  });
+});
+</script>
+</body>
+</html>

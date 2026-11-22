@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="pinto-intro.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Employee Data Cleaning Python | Pinto Leonard</title>
+<meta name="description" content="Employee data cleaning and standardization pipeline in Python by Pinto Leonard.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#050505;
+  --s1:#0c0c0d;
+  --ink:#f4f4f5;
+  --muted:#8b8b93;
+  --silver:#d4d4d8;
+  --line:rgba(255,255,255,.09);
+  --line2:rgba(255,255,255,.17);
+  --card:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.012)),#0b0b0c;
+  --card-hover:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.025)),#101012;
+  --fade:linear-gradient(180deg,#fff 25%,#6c6c73);
+  --max:1160px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font:400 16px/1.65 Inter,-apple-system,BlinkMacSystemFont,sans-serif;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* 64px Square Grid + Top Glow */
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-2;
+  background:
+    linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px) 0 0/64px 64px,
+    linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px) 0 0/64px 64px;
+  -webkit-mask-image:radial-gradient(ellipse at 50% 25%,#000 15%,transparent 75%);
+  mask-image:radial-gradient(ellipse at 50% 25%,#000 15%,transparent 75%);
+}
+body:after{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:
+    radial-gradient(60% 45% at 50% 0,rgba(255,255,255,.11),transparent 70%),
+    radial-gradient(40% 40% at 88% 55%,rgba(190,195,210,.07),transparent 70%);
+}
+
+a{color:inherit;text-decoration:none}
+a:focus-visible,button:focus-visible{outline:2px solid #fff;outline-offset:4px;border-radius:10px}
+h1,h2,h3,.brand,.font-display{font-family:"Inter Tight",Inter,sans-serif;font-weight:600;line-height:1.08}
+
+.wrap{width:min(var(--max),calc(100% - 44px));margin:auto}
+
+/* Scroll Progress & Back-to-Top */
+#bar{
+  position:fixed;top:0;left:0;height:2px;width:100%;
+  background:#fff;transform-origin:left;transform:scaleX(0);z-index:60;
+}
+#top-btn{
+  position:fixed;right:22px;bottom:22px;width:46px;height:46px;border-radius:50%;
+  border:1px solid var(--line2);background:rgba(16,16,17,.85);backdrop-filter:blur(10px);
+  color:#fff;font-size:20px;cursor:pointer;z-index:45;opacity:0;transform:translateY(20px);
+  pointer-events:none;transition:.35s;
+}
+#top-btn.show{opacity:1;transform:none;pointer-events:auto}
+#top-btn:hover{background:#fff;color:#050505}
+
+/* Sticky Pill Nav */
+header{position:sticky;top:12px;z-index:30;margin-top:12px}
+nav{
+  min-height:58px;padding:0 9px 0 24px;display:flex;align-items:center;
+  justify-content:space-between;gap:20px;background:rgba(14,14,15,.72);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border:1px solid var(--line);border-radius:999px;
+}
+.brand{font-size:21px;letter-spacing:-.04em}
+nav ul{display:flex;gap:22px;list-style:none}
+nav ul a{font-size:14px;font-weight:500;color:var(--muted);transition:color .2s}
+nav ul a:hover,nav ul a.active{color:#fff}
+.nav-cta{
+  font-size:14px;font-weight:600;color:#050505;background:#fff;
+  padding:10px 18px;border-radius:999px;transition:box-shadow .25s;white-space:nowrap;
+}
+.nav-cta:hover{box-shadow:0 0 26px rgba(255,255,255,.45)}
+
+.pill{
+  display:inline-flex;align-items:center;gap:9px;padding:6px 14px;
+  border:1px solid var(--line2);border-radius:999px;background:rgba(255,255,255,.05);
+  font-size:12.5px;font-weight:500;color:var(--silver);margin-bottom:18px;
+}
+.pill-sq{
+  width:7px;height:7px;border-radius:2px;background:#fff;
+  box-shadow:0 0 10px rgba(255,255,255,.7);
+}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  padding:13px 22px;border-radius:999px;font-weight:600;font-size:14px;
+  cursor:pointer;transition:transform .25s,box-shadow .25s,background .25s,border-color .25s;
+}
+.btn:hover{transform:translateY(-3px)}
+.btn-primary{background:#fff;color:#050505;box-shadow:0 8px 30px rgba(255,255,255,.18);border:none}
+.btn-primary:hover{box-shadow:0 12px 40px rgba(255,255,255,.35)}
+.btn-ghost{background:rgba(255,255,255,.05);border:1px solid var(--line2);color:var(--ink)}
+.btn-ghost:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.35)}
+
+/* Introduction + Floating Python, Table & Shield Symbols */
+.hero-intro{padding:78px 0 72px}
+.hero-grid{
+  display:grid;
+  grid-template-columns:1.15fr .85fr;
+  gap:40px;
+  align-items:center;
+}
+.hero-intro h1{
+  font-size:clamp(40px,5.6vw,68px);
+  letter-spacing:-.045em;
+  margin-bottom:18px;
+}
+.gradient{
+  background:linear-gradient(180deg,#d9d9de,#5f5f66);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero-lead{
+  max-width:600px;color:var(--muted);font-size:17px;line-height:1.7;margin-bottom:28px;
+}
+.actions{display:flex;flex-wrap:wrap;gap:12px}
+
+.float-symbols{
+  position:relative;
+  min-height:320px;
+  display:grid;
+  place-items:center;
+}
+.symbol-stage{
+  position:relative;
+  width:100%;
+  max-width:380px;
+  height:310px;
+  border-radius:24px;
+  border:1px solid var(--line);
+  background:var(--card);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 24px 60px rgba(0,0,0,.65);
+  overflow:hidden;
+}
+.sym-badge{
+  position:absolute;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:12px 18px;
+  border-radius:16px;
+  background:rgba(14,14,16,.92);
+  border:1px solid var(--line2);
+  color:#fff;
+  font-family:"JetBrains Mono",monospace;
+  font-size:13px;
+  font-weight:600;
+  box-shadow:0 14px 34px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.1);
+}
+.sym-icon{font-size:22px;line-height:1}
+.sym-py{top:26px;left:24px;animation:driftA 5.8s ease-in-out infinite}
+.sym-data{
+  top:50%;right:24px;transform:translateY(-50%);
+  padding:16px 20px;border-radius:20px;border-color:rgba(255,255,255,.32);
+  animation:driftB 6.4s ease-in-out infinite;
+}
+.sym-qa{bottom:26px;left:44px;animation:driftC 5.2s ease-in-out infinite}
+
+@keyframes driftA{0%,100%{transform:translate(0,0)}50%{transform:translate(6px,-10px)}}
+@keyframes driftB{0%,100%{transform:translate(0,-50%)}50%{transform:translate(-7px,calc(-50% - 9px))}}
+@keyframes driftC{0%,100%{transform:translate(0,0)}50%{transform:translate(8px,8px)}}
+
+section{padding:84px 0;border-top:1px solid var(--line)}
+.section-head{max-width:740px;margin-bottom:38px}
+.section-head h2{
+  font-size:clamp(30px,4.2vw,46px);letter-spacing:-.04em;margin-bottom:12px;
+  background:var(--fade);-webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.section-head p{color:var(--muted);font-size:16.5px}
+
+/* SMALL DESIGN CHANGE AFTER INTRO: 3-Column Bento Pill Cards with Top Accent Line */
+.bento-3{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+.bento-card{
+  position:relative;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:22px;
+  padding:26px;
+  overflow:hidden;
+  transition:transform .35s cubic-bezier(.16,1,.3,1),border-color .3s,background .3s;
+}
+.bento-card:before{
+  content:"";
+  position:absolute;
+  top:0;left:24px;right:24px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);
+  opacity:.7;
+}
+.bento-card:hover{
+  transform:translateY(-6px);
+  border-color:var(--line2);
+  background:var(--card-hover);
+}
+.bento-tag{
+  font-family:"JetBrains Mono",monospace;
+  font-size:11.5px;
+  color:var(--silver);
+  letter-spacing:.08em;
+  display:inline-block;
+  margin-bottom:12px;
+}
+.bento-card h3{font-size:20px;color:#fff;margin-bottom:10px}
+.bento-card p{color:var(--muted);font-size:14.5px;margin-bottom:16px}
+.mini-list{list-style:none;display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:14px}
+.mini-list li{font-size:13.5px;color:var(--silver);padding-left:16px;position:relative}
+.mini-list li:before{content:"▪";position:absolute;left:0;color:#fff;font-size:10px;top:3px}
+
+/* Python Snippet Switcher */
+.py-switcher{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.py-tab{
+  padding:10px 16px;border-radius:999px;border:1px solid var(--line);
+  background:var(--card);color:var(--muted);font-size:13.5px;font-weight:500;
+  cursor:pointer;transition:.2s;
+}
+.py-tab:hover{color:#fff;border-color:var(--line2)}
+.py-tab.active{background:#fff;color:#050505;border-color:#fff;font-weight:600}
+
+.code-card{
+  background:var(--card);border:1px solid var(--line2);border-radius:22px;padding:26px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07);
+}
+.code-meta{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  flex-wrap:wrap;margin-bottom:14px;
+}
+.code-meta h3{font-size:21px;color:#fff}
+.code-frame{background:#060607;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.code-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px;background:rgba(255,255,255,.04);border-bottom:1px solid var(--line);
+  font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--silver);
+}
+.copy-btn{
+  padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.08);
+  border:1px solid var(--line2);color:#fff;font-size:12px;font-weight:600;cursor:pointer;
+}
+.copy-btn:hover{background:#fff;color:#050505}
+.code-frame pre{
+  padding:18px;font-family:"JetBrains Mono",monospace;font-size:13px;line-height:1.68;
+  color:var(--silver);overflow-x:auto;white-space:pre;
+}
+
+/* Graphical Quality Cards with Motion Bars */
+.graphics-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-bottom:22px}
+.graphic-card{
+  background:var(--card);border:1px solid var(--line);border-radius:22px;padding:24px;
+  transition:transform .3s ease,border-color .3s;
+}
+.graphic-card:hover{transform:translateY(-5px);border-color:var(--line2)}
+.g-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.g-code{
+  font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--silver);
+  padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line2);
+}
+.g-val{font-family:"Inter Tight",sans-serif;font-size:22px;font-weight:700;color:#fff}
+.graphic-card p{color:var(--muted);font-size:14px;margin-bottom:14px}
+.signal-bars{
+  display:flex;align-items:flex-end;gap:6px;height:46px;
+  padding:8px 12px;border-radius:12px;background:rgba(0,0,0,.45);border:1px solid var(--line);
+}
+.signal-bars i{
+  flex:1;border-radius:3px 3px 1px 1px;background:linear-gradient(180deg,#fff,#686870);
+  transform-origin:bottom;animation:eqPulse 2.4s ease-in-out infinite alternate;
+}
+.signal-bars i:nth-child(1){height:38%;animation-delay:0s}
+.signal-bars i:nth-child(2){height:62%;animation-delay:-.2s}
+.signal-bars i:nth-child(3){height:85%;animation-delay:-.4s}
+.signal-bars i:nth-child(4){height:70%;animation-delay:-.6s}
+.signal-bars i:nth-child(5){height:92%;animation-delay:-.8s}
+.signal-bars i:nth-child(6){height:50%;animation-delay:-1s}
+.signal-bars i:nth-child(7){height:76%;animation-delay:-1.2s}
+@keyframes eqPulse{0%{transform:scaleY(.55);opacity:.65}100%{transform:scaleY(1);opacity:1}}
+
+/* Chart + Table */
+.charts-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px}
+.chart-card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:24px}
+.chart-card h3{font-size:18px;color:#fff;margin-bottom:4px}
+.chart-card p{font-size:13.5px;color:var(--muted);margin-bottom:14px}
+.chart-box{position:relative;height:250px;width:100%}
+
+.table-wrap{overflow-x:auto;border-radius:22px;border:1px solid var(--line);background:var(--card)}
+table{width:100%;border-collapse:collapse;min-width:580px}
+th{
+  text-align:left;padding:14px 20px;font-family:"JetBrains Mono",monospace;
+  font-size:12px;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--silver);background:rgba(255,255,255,.04);border-bottom:1px solid var(--line);
+}
+td{padding:14px 20px;border-bottom:1px solid var(--line);font-size:14.5px;color:var(--muted)}
+td strong{color:var(--ink)}
+tbody tr:last-child td{border-bottom:none}
+code{
+  font-family:"JetBrains Mono",monospace;font-size:12.5px;padding:2px 6px;
+  border-radius:6px;background:rgba(255,255,255,.07);color:#fff;
+}
+
+/* CTA & Footer */
+.cta-box{
+  position:relative;overflow:hidden;
+  background:radial-gradient(60% 120% at 80% 0,rgba(255,255,255,.12),transparent 70%),var(--card);
+  border:1px solid var(--line2);border-radius:28px;padding:42px;
+  display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;
+}
+.cta-box h2{
+  font-size:32px;letter-spacing:-.035em;margin-bottom:8px;
+  background:var(--fade);-webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.cta-box p{color:var(--muted);max-width:560px}
+
+footer{padding:35px 0 0;color:var(--muted);font-size:13px;border-top:1px solid var(--line);overflow:hidden}
+.footer-row{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.footer-links{display:flex;gap:20px;font-weight:500}
+.footer-links a:hover{color:#fff}
+.mark{
+  font:700 clamp(70px,17vw,230px)/.85 "Inter Tight";letter-spacing:-.06em;
+  text-align:center;margin-top:34px;height:.62em;overflow:hidden;white-space:nowrap;
+  background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0) 85%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;user-select:none;
+}
+
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
+.reveal.visible{opacity:1;transform:none}
+
+@media(prefers-reduced-motion:reduce){
+  *{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}
+  .reveal{opacity:1;transform:none}
+}
+@media(max-width:960px){
+  .hero-grid,.bento-3,.graphics-grid,.charts-2{grid-template-columns:1fr}
+  .float-symbols{min-height:260px}
+}
+@media(max-width:680px){
+  .wrap{width:calc(100% - 32px)}
+  nav{padding-left:18px}
+  nav ul{display:none}
+  section{padding:64px 0}
+  #top-btn{right:14px;bottom:14px}
+}
+</style>
+</head>
+<body>
+
+<div id="bar"></div>
+<button id="top-btn" aria-label="Back to top">↑</button>
+
+<header>
+  <div class="wrap">
+    <nav aria-label="Main navigation">
+      <a class="brand" href="index.html#top">Pinto<span>.</span></a>
+      <ul>
+        <li><a href="#overview">Introduction</a></li>
+        <li><a href="#rules">Cleaning Rules</a></li>
+        <li><a href="#python-lab">Python Steps</a></li>
+        <li><a href="#metrics">Quality &amp; Charts</a></li>
+      </ul>
+      <a class="nav-cta" href="index.html#projects">← Projects</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- INTRODUCTION + FLOATING PYTHON, DATASET & QUALITY SYMBOLS -->
+  <section class="hero-intro" id="overview" style="border-top:none">
+    <div class="wrap hero-grid">
+      <div class="reveal">
+        <div class="pill"><span class="pill-sq"></span> Python Data Wrangling · Introduction</div>
+        <h1>Employee Data<br><span class="gradient">Cleaning in Python.</span></h1>
+        <p class="hero-lead">Automated data hygiene workflow in Python to normalize messy employee records—handling missing fields, inconsistent text casing, date formats, salary/status types, and duplicate entries before analysis.</p>
+
+        <div class="actions">
+          <a class="btn btn-primary" href="#python-lab">Inspect Python Steps ↓</a>
+          <a class="btn btn-ghost" href="https://github.com/datajutsu-jpl/employee-data-cleaning-python" target="_blank" rel="noopener">View Repo on GitHub ↗</a>
+        </div>
+      </div>
+
+      <div class="float-symbols reveal" aria-hidden="true">
+        <div class="symbol-stage">
+          <div class="sym-badge sym-py"><span class="sym-icon">🐍</span><span>PYTHON</span></div>
+          <div class="sym-badge sym-data"><span class="sym-icon">🧾</span><span>HR RECORDS</span></div>
+          <div class="sym-badge sym-qa"><span class="sym-icon">📈</span><span>DATA QA</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SMALL DESIGN CHANGE AFTER INTRO: 3-COLUMN TOP-ACCENT BENTO CARDS -->
+  <section id="rules">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="pill">01 · Core Hygiene Pillars</div>
+        <h2>What raw HR data needs before reporting</h2>
+        <p>Three focused pillars keep employee rosters accurate across departments, payroll checks, and BI dashboards.</p>
+      </div>
+
+      <div class="bento-3 reveal">
+        <article class="bento-card">
+          <span class="bento-tag">PILLAR 01 · TEXT &amp; KEYS</span>
+          <h3>Standardize Names &amp; IDs</h3>
+          <p>Trim whitespace, unify casing, and normalize department or role labels so grouping never splits identical records.</p>
+          <ul class="mini-list">
+            <li>Strip leading/trailing spaces &amp; stray symbols</li>
+            <li>Consistent title/uppercase formatting</li>
+          </ul>
+        </article>
+
+        <article class="bento-card">
+          <span class="bento-tag">PILLAR 02 · TYPES &amp; DATES</span>
+          <h3>Enforce Dates &amp; Numerics</h3>
+          <p>Coerce mixed strings into proper dates and numeric salary/compensation types while surfacing invalid values.</p>
+          <ul class="mini-list">
+            <li>Parse mixed hire/exit date formats safely</li>
+            <li>Clean currency signs &amp; numeric casts</li>
+          </ul>
+        </article>
+
+        <article class="bento-card">
+          <span class="bento-tag">PILLAR 03 · DEDUP &amp; NULLS</span>
+          <h3>Resolve Duplicates &amp; Gaps</h3>
+          <p>Identify duplicate employee rows and audit missing attributes before exporting the cleaned dataset.</p>
+          <ul class="mini-list">
+            <li>Deterministic deduplication on key fields</li>
+            <li>Pre/post row &amp; null-count reconciliation</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- PYTHON STEP SWITCHER -->
+  <section id="python-lab">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="pill">02 · Python Transformations</div>
+        <h2>Step-by-step cleaning snippets</h2>
+        <p>Switch between cleaning stages to inspect readable, repeatable Python logic.</p>
+      </div>
+
+      <div class="reveal">
+        <div class="py-switcher" role="tablist" aria-label="Python cleaning steps">
+          <button class="py-tab active" type="button" onclick="selectPy(0, this)">01 · Text &amp; Whitespace</button>
+          <button class="py-tab" type="button" onclick="selectPy(1, this)">02 · Dates &amp; Salary Types</button>
+          <button class="py-tab" type="button" onclick="selectPy(2, this)">03 · Duplicates &amp; Audit</button>
+        </div>
+
+        <div class="code-card">
+          <div class="code-meta">
+            <h3 id="pyTitle">Normalize Text Columns &amp; Whitespace</h3>
+            <button class="copy-btn" type="button" onclick="copyPy()">Copy Python</button>
+          </div>
+          <div class="code-frame">
+            <div class="code-bar">
+              <span id="pyFile">clean_text_fields.py</span>
+              <span>Python · pandas</span>
+            </div>
+            <pre id="pyCode">import pandas as pd
+
+text_cols = ["full_name", "department", "job_role", "location"]
+for col in text_cols:
+    if col in df.columns:
+        df[col] = (
+            df[col]
+            .astype("string")
+            .str.strip()
+            .str.replace(r"\s+", " ", regex=True)
+        )
+
+if "department" in df.columns:
+    df["department"] = df["department"].str.title()</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GRAPHICAL QUALITY CARDS + CHARTS & TABLE -->
+  <section id="metrics">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="pill">03 · Graphical QA &amp; Summary</div>
+        <h2>Data quality signals &amp; validation summary</h2>
+        <p>Replace sample chart values with exact counts from your <code>employee-data-cleaning-python</code> runs whenever needed.</p>
+      </div>
+
+      <div class="graphics-grid reveal">
+        <article class="graphic-card">
+          <div class="g-top">
+            <span class="g-code">CHECK 01 · COMPLETENESS</span>
+            <span class="g-val">Null Audit</span>
+          </div>
+          <p>Tracks missing values across critical employee attributes before downstream reporting.</p>
+          <div class="signal-bars" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
+        </article>
+
+        <article class="graphic-card">
+          <div class="g-top">
+            <span class="g-code">CHECK 02 · UNIQUENESS</span>
+            <span class="g-val">Deduped</span>
+          </div>
+          <p>Confirms duplicate records and conflicting entries are resolved cleanly.</p>
+          <div class="signal-bars" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
+        </article>
+      </div>
+
+      <div class="charts-2 reveal">
+        <div class="chart-card">
+          <h3>Before vs. After Cleaning (Sample)</h3>
+          <p>Illustrative row count comparison after duplicate &amp; invalid row handling</p>
+          <div class="chart-box"><canvas id="cleanChart"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <h3>Issue Breakdown by Category (Sample)</h3>
+          <p>Illustrative share of data hygiene fixes applied</p>
+          <div class="chart-box"><canvas id="issueChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table>
+          <thead>
+            <tr>
+              <th>Cleaning Stage</th>
+              <th>Target Fields</th>
+              <th>Rule Applied</th>
+              <th>Verification</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>String Hygiene</strong></td>
+              <td>Names, Dept, Role</td>
+              <td>Trim spaces, collapse internal whitespace, unify case</td>
+              <td>Distinct category values inspected</td>
+            </tr>
+            <tr>
+              <td><strong>Type &amp; Date Casting</strong></td>
+              <td>Hire Date, Salary</td>
+              <td><code>to_datetime(..., errors="coerce")</code> &amp; numeric parsing</td>
+              <td>Zero unparsed type mismatches in output</td>
+            </tr>
+            <tr>
+              <td><strong>Deduplication</strong></td>
+              <td>Employee ID / Key</td>
+              <td><code>drop_duplicates()</code> with explicit key &amp; ordering</td>
+              <td>Row count reconciled before &amp; after export</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section>
+    <div class="wrap">
+      <div class="cta-box reveal">
+        <div>
+          <div class="pill">Repository</div>
+          <h2>Explore the Python cleaning scripts</h2>
+          <p>Inspect the code, documentation, and cleaning workflow on GitHub.</p>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <a class="btn btn-primary" href="https://github.com/datajutsu-jpl/employee-data-cleaning-python" target="_blank" rel="noopener">Open GitHub Repo ↗</a>
+          <a class="btn btn-ghost" href="get_in_touch.html">Let's connect ↗</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap footer-row">
+    <span>© 2026 Pinto Leonard · Employee Data Cleaning Python Case Study</span>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="Project.html">All Projects</a>
+      <a href="https://github.com/datajutsu-jpl/employee-data-cleaning-python" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+  <div class="mark" aria-hidden="true">Pinto Leonard</div>
+</footer>
+
+<script>
+const bar = document.getElementById('bar'), tb = document.getElementById('top-btn');
+window.addEventListener('scroll', () => {
+  bar.style.transform = `scaleX(${scrollY / (document.documentElement.scrollHeight - innerHeight || 1)})`;
+  tb.classList.toggle('show', scrollY > 600);
+}, { passive: true });
+tb.onclick = () => scrollTo({ top: 0 });
+
+const navLinks = [...document.querySelectorAll('nav ul a')];
+const so = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+  });
+}, { rootMargin: '-45% 0px -50% 0px' });
+document.querySelectorAll('section[id]').forEach(s => so.observe(s));
+
+const io = new IntersectionObserver((entries, obs) => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add('visible');
+    obs.unobserve(e.target);
+  });
+}, { threshold: 0.14 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+const pySteps = [
+  {
+    title: 'Normalize Text Columns & Whitespace',
+    file: 'clean_text_fields.py',
+    code: `import pandas as pd
+
+text_cols = ["full_name", "department", "job_role", "location"]
+for col in text_cols:
+    if col in df.columns:
+        df[col] = (
+            df[col]
+            .astype("string")
+            .str.strip()
+            .str.replace(r"\\s+", " ", regex=True)
+        )
+
+if "department" in df.columns:
+    df["department"] = df["department"].str.title()`
+  },
+  {
+    title: 'Standardize Dates & Numeric Compensation',
+    file: 'clean_types_and_dates.py',
+    code: `import pandas as pd
+
+if "hire_date" in df.columns:
+    df["hire_date"] = pd.to_datetime(df["hire_date"], errors="coerce")
+
+if "salary" in df.columns:
+    df["salary"] = pd.to_numeric(
+        df["salary"].astype("string").str.replace(r"[^0-9.-]", "", regex=True),
+        errors="coerce"
+    )`
+  },
+  {
+    title: 'Deduplicate Records & Audit Row Counts',
+    file: 'dedup_and_audit.py',
+    code: `raw_rows = len(df)
+
+df = df.drop_duplicates(subset=["employee_id"], keep="first").reset_index(drop=True)
+
+clean_rows = len(df)
+print(f"Raw rows: {raw_rows} | Clean rows: {clean_rows} | Removed: {raw_rows - clean_rows}")`
+  }
+];
+
+function selectPy(i, btn) {
+  document.querySelectorAll('.py-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const s = pySteps[i];
+  document.getElementById('pyTitle').textContent = s.title;
+  document.getElementById('pyFile').textContent = s.file;
+  document.getElementById('pyCode').textContent = s.code;
+}
+
+function copyPy() {
+  const txt = document.getElementById('pyCode').innerText;
+  const btn = document.querySelector('.copy-btn');
+  navigator.clipboard.writeText(txt).then(() => {
+    const prev = btn.textContent;
+    btn.textContent = '✓ Copied';
+    setTimeout(() => btn.textContent = prev, 1400);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof Chart === 'undefined') return;
+  Chart.defaults.color = '#8b8b93';
+  Chart.defaults.font.family = "'Inter', sans-serif";
+
+  new Chart(document.getElementById('cleanChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: ['Raw Rows', 'Cleaned Rows'],
+      datasets: [{
+        label: 'Records (Sample)',
+        data: [1000, 965],
+        backgroundColor: ['rgba(212,212,216,.45)', 'rgba(255,255,255,.88)'],
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0c0c0d', borderColor: 'rgba(255,255,255,.2)', borderWidth: 1 } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#d4d4d8' } },
+        y: { grid: { color: 'rgba(255,255,255,.06)' } }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('issueChart').getContext('2d'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Whitespace & Case', 'Duplicates', 'Missing / Type Fix'],
+      datasets: [{
+        data: [42, 33, 25],
+        backgroundColor: ['#ffffff', '#a1a1aa', '#52525b'],
+        borderColor: '#0b0b0c', borderWidth: 3
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '64%',
+      plugins: {
+        legend: { position: 'right', labels: { color: '#d4d4d8', usePointStyle: true, pointStyle: 'rectRounded', padding: 14 } },
+        tooltip: { backgroundColor: '#0c0c0d', borderColor: 'rgba(255,255,255,.2)', borderWidth: 1 }
+      }
+    }
+  });
+});
+</script>
+</body>
+</html>

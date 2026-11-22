@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="pinto-intro.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Get in touch with Pinto Leonard, Data Engineer. Open to data engineering roles and project conversations.">
+<title>Get in touch | Pinto Leonard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050505;--s1:#0c0c0d;--ink:#f4f4f5;--muted:#8b8b93;--silver:#d4d4d8;--line:rgba(255,255,255,.09);--line2:rgba(255,255,255,.17);--card:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.012)),#0b0b0c;--fade:linear-gradient(180deg,#fff 25%,#6c6c73);--max:1160px}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.65 Inter,sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body:before{content:"";position:fixed;inset:0;z-index:-2;background:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px) 0 0/64px 64px,linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px) 0 0/64px 64px;-webkit-mask-image:radial-gradient(ellipse at 50% 25%,#000 15%,transparent 75%);mask-image:radial-gradient(ellipse at 50% 25%,#000 15%,transparent 75%)}
+body:after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(60% 45% at 50% 0,rgba(255,255,255,.11),transparent 70%),radial-gradient(40% 40% at 88% 55%,rgba(190,195,210,.07),transparent 70%)}
+a{color:inherit;text-decoration:none}
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid #fff;outline-offset:4px;border-radius:10px}
+h1,h2,h3,p{margin-top:0}
+h1,h2,h3,.brand{font-family:"Inter Tight",Inter,sans-serif;font-weight:600;line-height:1.05}
+.wrap{width:min(var(--max),calc(100% - 44px));margin:auto}
+#bar{position:fixed;top:0;left:0;height:2px;width:100%;background:#fff;transform-origin:left;transform:scaleX(0);z-index:50}
+header{position:sticky;top:12px;z-index:30;margin-top:12px}
+nav{min-height:58px;padding:0 9px 0 24px;display:flex;align-items:center;justify-content:space-between;gap:20px;background:rgba(14,14,15,.72);backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:999px}
+.brand{font-size:21px;letter-spacing:-.04em}
+nav ul{display:flex;gap:34px;list-style:none;margin:0;padding:0}
+nav ul a{font-size:14px;font-weight:500;color:var(--muted);transition:color .2s}
+nav ul a:hover,nav ul a.active{color:#fff}
+.nav-cta{font-size:14px;font-weight:600;color:#050505;background:#fff;padding:10px 18px;border-radius:999px;transition:box-shadow .25s}
+.nav-cta:hover{box-shadow:0 0 26px rgba(255,255,255,.45)}
+.pill{display:inline-flex;align-items:center;gap:9px;padding:6px 14px;border:1px solid var(--line2);border-radius:999px;background:rgba(255,255,255,.05);font-size:12.5px;font-weight:500;color:var(--silver);margin-bottom:22px}
+.pulse{width:6px;height:6px;border-radius:50%;background:#fff;box-shadow:0 0 9px #fff;animation:ping 1.8s infinite}
+
+/* hero */
+.hero{padding:80px 0 70px;display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:50px;min-height:600px}
+h1{font-size:clamp(42px,6.2vw,76px);letter-spacing:-.045em;margin-bottom:20px}
+.gradient{background:linear-gradient(180deg,#d9d9de,#5f5f66);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-copy{max-width:540px;color:var(--muted);font-size:17px;margin-bottom:30px}
+.actions{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:13px 22px;border-radius:999px;font-weight:600;font-size:14px;font-family:inherit;cursor:pointer;border:0;transition:transform .25s,box-shadow .25s,background .25s,border-color .25s}
+.btn:hover{transform:translateY(-3px)}
+.btn-primary{background:#fff;color:#050505;box-shadow:0 8px 30px rgba(255,255,255,.18)}
+.btn-primary:hover{box-shadow:0 12px 40px rgba(255,255,255,.35)}
+.btn-light{background:rgba(255,255,255,.05);border:1px solid var(--line2);color:var(--ink)}
+.btn-light:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.35)}
+.hero-visual{position:relative;min-height:440px;display:grid;place-items:center}
+.hero-visual:before{content:"";position:absolute;width:78%;height:78%;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.12),rgba(180,185,200,.04) 55%,transparent 72%);filter:blur(24px)}
+.flow{position:relative;z-index:2;width:100%;height:460px;display:block;-webkit-mask-image:radial-gradient(ellipse closest-side,#000 62%,transparent);mask-image:radial-gradient(ellipse closest-side,#000 62%,transparent)}
+.star{position:absolute;filter:drop-shadow(0 0 34px rgba(255,255,255,.22));animation:float 7s ease-in-out infinite}
+.s1{width:190px;top:-34px;right:-24px}.s2{width:96px;bottom:6px;left:-28px;animation-delay:-3s}.s3{width:44px;top:46%;right:-16px;animation-delay:-5s}
+.ring{position:absolute;width:52px;height:52px;border-radius:15px;display:grid;place-items:center;font:600 18px "Inter Tight";background:var(--card);border:1px solid var(--line2);box-shadow:0 10px 30px rgba(0,0,0,.6);animation:float 5s ease-in-out infinite;z-index:3}
+.r1{top:14px;left:6%}.r2{top:52%;right:-14px;animation-delay:-1.5s}.r3{bottom:4px;right:22%;animation-delay:-3s}
+.float-tag{position:absolute;z-index:3;padding:9px 15px;background:rgba(16,16,17,.9);border:1px solid var(--line2);border-radius:999px;font-size:12px;font-weight:500;box-shadow:0 12px 30px rgba(0,0,0,.6);animation:float 5s ease-in-out infinite}
+.tag-one{top:56px;right:-8px}.tag-two{bottom:50px;left:-14px;animation-delay:-2s}
+
+/* sections */
+section{padding:84px 0;border-top:1px solid var(--line)}
+.section-head{margin-bottom:38px}
+.section-head .pill{margin-bottom:18px}
+h2{font-size:clamp(32px,4.2vw,48px);letter-spacing:-.04em;margin-bottom:12px;background:var(--fade);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{max-width:600px;color:var(--muted);margin:0}
+
+/* channels */
+.channels{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.channel{position:relative;overflow:hidden;display:flex;flex-direction:column;min-height:230px;padding:26px;background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:inset 0 1px 0 rgba(255,255,255,.06);transition:transform .4s cubic-bezier(.16,1,.3,1),border-color .3s}
+.channel:before{content:"";position:absolute;inset:0;background:radial-gradient(260px circle at var(--mx,80%) var(--my,0%),rgba(255,255,255,.12),transparent 65%);opacity:0;transition:opacity .35s}
+.channel:hover{transform:translateY(-8px);border-color:var(--line2)}.channel:hover:before{opacity:1}
+.chan-icon{position:relative;width:52px;height:52px;border-radius:15px;display:grid;place-items:center;font:600 18px "Inter Tight";background:rgba(255,255,255,.06);border:1px solid var(--line2);margin-bottom:auto}
+.chan-icon svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.chan-arrow{position:absolute;right:24px;top:24px;font-size:20px;color:var(--muted);transition:transform .3s,color .3s}
+.channel:hover .chan-arrow{transform:translate(4px,-4px);color:#fff}
+.channel h3{position:relative;font-size:22px;letter-spacing:-.03em;margin:26px 0 6px}
+.channel p{position:relative;font-size:14px;color:var(--muted);margin:0;overflow-wrap:anywhere}
+
+/* message area */
+.message-grid{display:grid;grid-template-columns:.85fr 1.15fr;gap:20px;align-items:stretch}
+.panel{position:relative;overflow:hidden;background:var(--card);border:1px solid var(--line2);border-radius:28px;padding:40px;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.panel:after{content:"";position:absolute;width:320px;height:320px;border:1px solid var(--line);border-radius:50%;right:-140px;top:-170px;box-shadow:0 0 0 40px rgba(255,255,255,.02),0 0 0 80px rgba(255,255,255,.015);pointer-events:none}
+.panel h2{font-size:clamp(28px,3.4vw,38px)}
+.panel>p,.panel .lead{color:var(--muted)}
+.mail-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:26px 0 8px;padding:8px 8px 8px 20px;border:1px solid var(--line2);border-radius:999px;background:rgba(0,0,0,.4)}
+.mail-row span{font-size:14px;font-weight:500;overflow-wrap:anywhere}
+.copy{flex:none;font:600 13px Inter;color:#050505;background:#fff;border:0;border-radius:999px;padding:9px 16px;cursor:pointer;transition:box-shadow .25s,transform .25s}
+.copy:hover{box-shadow:0 0 22px rgba(255,255,255,.4);transform:translateY(-2px)}
+.where{font-size:13px;color:var(--muted);margin:0 0 30px 20px}
+.steps{position:relative;display:grid;gap:22px;border-top:1px solid var(--line);padding-top:28px}
+.step{position:relative;padding:16px 18px;border:1px solid var(--line2);background:rgba(0,0,0,.5);border-radius:16px;animation:lit 6s infinite}
+.step:nth-child(2){animation-delay:2s}.step:nth-child(3){animation-delay:4s}
+.step b{display:block;font:600 15px "Inter Tight";margin-bottom:2px}.step span{font-size:12.5px;color:var(--muted)}
+.step:not(:last-child):after{content:"";position:absolute;left:30px;top:100%;width:1px;height:22px;background:linear-gradient(180deg,#fff,transparent)}
+.step:not(:last-child):before{content:"";position:absolute;left:27px;top:100%;width:7px;height:7px;border-radius:50%;background:#fff;box-shadow:0 0 12px #fff;animation:flowY 1.8s linear infinite;z-index:2}
+
+form{display:grid;gap:18px;margin-top:26px;position:relative;z-index:1}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend,.field label{font-size:13px;font-weight:500;color:var(--silver);padding:0;margin-bottom:9px;display:block}
+.topics{display:flex;flex-wrap:wrap;gap:8px}
+.topic{position:relative}
+.topic input{position:absolute;opacity:0;inset:0;cursor:pointer;margin:0}
+.topic span{display:inline-flex;padding:9px 17px;border:1px solid var(--line2);border-radius:999px;background:rgba(255,255,255,.04);font-size:13.5px;font-weight:500;color:var(--muted);transition:.25s}
+.topic:hover span{border-color:rgba(255,255,255,.4);color:#fff}
+.topic input:checked+span{background:#fff;color:#050505;border-color:#fff;box-shadow:0 0 22px rgba(255,255,255,.2)}
+.topic input:focus-visible+span{outline:2px solid #fff;outline-offset:3px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field input,.field textarea{width:100%;background:rgba(0,0,0,.45);border:1px solid var(--line2);border-radius:14px;color:var(--ink);padding:14px 16px;font:400 15px/1.5 Inter,sans-serif;transition:border-color .25s,box-shadow .25s,background .25s}
+.field input::placeholder,.field textarea::placeholder{color:#5c5c64}
+.field input:focus,.field textarea:focus{outline:none;border-color:rgba(255,255,255,.7);background:rgba(0,0,0,.65);box-shadow:0 0 0 4px rgba(255,255,255,.08),0 0 30px rgba(255,255,255,.07)}
+textarea{min-height:140px;resize:vertical}
+.send{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.send .btn{min-width:190px}
+.send .btn[disabled]{opacity:.6;cursor:wait;transform:none}
+.status{font-size:13px;color:var(--muted);margin:0;min-height:20px}
+.status.ok{color:#fff}.status.err{color:#ffb4b4}
+.hp{position:absolute;left:-9999px;opacity:0;height:0;width:0}
+
+/* footer */
+footer{padding:35px 0 0;color:var(--muted);font-size:13px;border-top:1px solid var(--line);overflow:hidden}
+.footer-row{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.footer-links{display:flex;gap:20px;font-weight:500}.footer-links a:hover{color:#fff}
+.mark{font:700 clamp(70px,17vw,230px)/.85 "Inter Tight";letter-spacing:-.06em;text-align:center;margin-top:34px;height:.62em;overflow:hidden;white-space:nowrap;background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0) 85%);-webkit-background-clip:text;background-clip:text;color:transparent;user-select:none}
+#top-btn{position:fixed;right:22px;bottom:22px;width:46px;height:46px;border-radius:50%;border:1px solid var(--line2);background:rgba(16,16,17,.85);backdrop-filter:blur(10px);color:#fff;font-size:20px;cursor:pointer;z-index:40;opacity:0;transform:translateY(20px);pointer-events:none;transition:.35s}
+#top-btn.show{opacity:1;transform:none;pointer-events:auto}#top-btn:hover{background:#fff;color:#050505}
+
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
+.reveal.visible{opacity:1;transform:none}
+.delay-1{transition-delay:.12s}.delay-2{transition-delay:.24s}.delay-3{transition-delay:.36s}
+@keyframes ping{70%{box-shadow:0 0 0 10px rgba(255,255,255,0)}100%{box-shadow:0 0 0 0 rgba(255,255,255,0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes lit{0%,22%,100%{border-color:rgba(255,255,255,.17);box-shadow:none}8%,14%{border-color:#fff;box-shadow:0 0 30px rgba(255,255,255,.2)}}
+@keyframes flowY{0%{transform:translateY(-22px);opacity:0}20%,80%{opacity:1}100%{transform:none;opacity:0}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-delay:0ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.reveal{opacity:1;transform:none}}
+@media(max-width:900px){.hero{grid-template-columns:1fr;gap:20px;padding-top:60px}.channels{grid-template-columns:1fr 1fr}.message-grid{grid-template-columns:1fr}}
+@media(max-width:620px){.wrap{width:calc(100% - 32px)}nav{padding-left:18px}nav ul{display:none}.hero{padding:44px 0 40px;min-height:auto}.hero-copy{font-size:16px}.flow{height:340px}.ring{display:none}.s1{width:140px;right:-6px}.s2{left:-6px}.tag-one{right:0}.tag-two{left:0}section{padding:64px 0}.channels,.row2{grid-template-columns:1fr}.channel{min-height:190px}.panel{padding:26px 20px}.footer-row{display:block}.footer-links{margin-top:13px}#top-btn{right:14px;bottom:14px}.send .btn{width:100%}}
+</style>
+<script src="intro.js"></script>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="chrome" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".4" stop-color="#6e6e75"/><stop offset=".62" stop-color="#151516"/><stop offset="1" stop-color="#d8d8dc"/></linearGradient><path id="st" d="M50 0C54 34 66 46 100 50 66 54 54 66 50 100 46 66 34 54 0 50 34 46 46 34 50 0Z"/></defs></svg>
+<div id="bar"></div>
+<button id="top-btn" aria-label="Back to top">↑</button>
+<header>
+  <div class="wrap"><nav aria-label="Main navigation">
+    <a class="brand" href="index.html#top">Pinto<span>.</span></a>
+    <ul>
+      <li><a href="Project.html">Projects</a></li><li><a href="index.html#case-study">Case study</a></li><li><a href="index.html#stack">Tech stack</a></li>
+    </ul>
+    <a class="nav-cta" href="#message" aria-current="page">Send a message ↓</a>
+  </nav></div>
+</header>
+
+<main id="top">
+  <div class="wrap hero">
+    <div class="hero-content reveal">
+      <div class="pill"><span class="pulse"></span> Available for Data Engineering Roles</div>
+      <h1>Let's connect <span class="gradient">through data.</span></h1>
+      <p class="hero-copy">I'm looking for data engineering roles where I can build reliable pipelines, shape data people trust and turn complex systems into something useful. If that sounds like your team, say hello.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="#message">Write to me <span>↗</span></a>
+        <a class="btn btn-light" href="resume.pdf" target="_blank" rel="noopener">Download resume ↓</a>
+      </div>
+    </div>
+    <div class="hero-visual reveal delay-2" aria-hidden="true">
+      <svg class="star s1" viewBox="0 0 100 100"><use href="#st" fill="url(#chrome)" stroke="rgba(255,255,255,.5)" stroke-width=".6"/></svg>
+      <svg class="star s2" viewBox="0 0 100 100"><use href="#st" fill="url(#chrome)" stroke="rgba(255,255,255,.5)" stroke-width=".6"/></svg>
+      <svg class="star s3" viewBox="0 0 100 100"><use href="#st" fill="url(#chrome)" stroke="rgba(255,255,255,.5)" stroke-width=".6"/></svg>
+      <div class="ring r1">@</div><div class="ring r2">in</div><div class="ring r3">⌘</div>
+      <canvas class="flow" id="flow"></canvas>
+      <div class="float-tag tag-one">✉ Say hello</div>
+      <div class="float-tag tag-two">✦ Let's build</div>
+    </div>
+  </div>
+
+  <section id="channels"><div class="wrap">
+    <div class="section-head reveal"><div class="pill">Direct links</div><h2>Find me online</h2><p class="sub">Pick whichever is easiest. Email is the fastest way to reach me about a role.</p></div>
+    <div class="channels">
+      <a class="channel reveal" href="mailto:pintoleonarrd@gmail.com"><span class="chan-arrow">↗</span><span class="chan-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg></span><h3>Email</h3><p>pintoleonarrd@gmail.com</p></a>
+      <a class="channel reveal delay-1" href="https://www.linkedin.com/in/pinto-leonard-aa7b202b5" target="_blank" rel="noopener"><span class="chan-arrow">↗</span><span class="chan-icon">in</span><h3>LinkedIn</h3><p>Connect with me professionally.</p></a>
+      <a class="channel reveal delay-2" href="https://github.com/datajutsu-jpl" target="_blank" rel="noopener"><span class="chan-arrow">↗</span><span class="chan-icon">⌘</span><h3>GitHub</h3><p>Pipelines, notebooks and code at datajutsu-jpl.</p></a>
+      <a class="channel reveal delay-3" href="resume.pdf" target="_blank" rel="noopener"><span class="chan-arrow">↗</span><span class="chan-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg></span><h3>Resume</h3><p>My experience and technical background (PDF).</p></a>
+    </div>
+  </div></section>
+
+  <section id="message"><div class="wrap">
+    <div class="message-grid">
+      <div class="panel reveal">
+        <div class="pill">Prefer email?</div>
+        <h2>Have a role or project in mind?</h2>
+        <p class="lead">Tell me what you're building and what you need. I read every message and reply personally.</p>
+        <div class="mail-row"><span id="mail">pintoleonarrd@gmail.com</span><button class="copy" id="copy" type="button">Copy email</button></div>
+        <p class="where">Based in India · Open to relevant opportunities</p>
+        <div class="steps" aria-label="What happens after you write">
+          <div class="step"><b>You send a message</b><span>Use the form or email me directly.</span></div>
+          <div class="step"><b>It lands in my inbox</b><span>Through Formspree, straight to my email.</span></div>
+          <div class="step"><b>I reply</b><span>With next steps or a time to talk.</span></div>
+        </div>
+      </div>
+
+      <div class="panel reveal delay-2">
+        <div class="pill">Send a message</div>
+        <h2>Drop me a note.</h2>
+        <p class="lead" style="margin:0">Share a few details and I'll get back to you.</p>
+        <form id="contactForm" action="https://formspree.io/f/xljbwqnk" method="POST">
+          <fieldset>
+            <legend>What's this about?</legend>
+            <div class="topics">
+              <label class="topic"><input type="radio" name="topic" value="Job opportunity" checked><span>Job opportunity</span></label>
+              <label class="topic"><input type="radio" name="topic" value="Project discussion"><span>Project discussion</span></label>
+              <label class="topic"><input type="radio" name="topic" value="Networking"><span>Networking</span></label>
+              <label class="topic"><input type="radio" name="topic" value="Other"><span>Other</span></label>
+            </div>
+          </fieldset>
+          <div class="row2">
+            <div class="field"><label for="name">Your name</label><input id="name" name="name" placeholder="Full name" autocomplete="name" required></div>
+            <div class="field"><label for="email">Your email</label><input id="email" name="email" type="email" placeholder="name@company.com" autocomplete="email" required></div>
+          </div>
+          <div class="field"><label for="message-text">Message</label><textarea id="message-text" name="message" placeholder="Tell me about the role or project..." required></textarea></div>
+          <input class="hp" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <div class="send">
+            <button class="btn btn-primary" type="submit" id="sendBtn">Send message <span>↗</span></button>
+            <p class="status" id="formNote" role="status" aria-live="polite"></p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div></section>
+</main>
+
+<footer><div class="wrap footer-row"><span>© 2026 Pinto Leonard · Data Engineer Portfolio</span><div class="footer-links"><a href="mailto:pintoleonarrd@gmail.com">Email</a><a href="https://www.linkedin.com/in/pinto-leonard-aa7b202b5" target="_blank" rel="noopener">LinkedIn</a><a href="https://github.com/datajutsu-jpl" target="_blank" rel="noopener">GitHub</a></div></div><div class="mark" aria-hidden="true">Pinto Leonard</div></footer>
+
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
+  const $ = (s, c = document) => [...c.querySelectorAll(s)];
+
+  // reveal on scroll
+  const io = new IntersectionObserver((es, o) => es.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add('visible'); o.unobserve(e.target);
+  }), { threshold: .14, rootMargin: '0px 0px -35px 0px' });
+  $('.reveal').forEach(el => io.observe(el));
+
+  // progress bar + back to top
+  const bar = document.getElementById('bar'), tb = document.getElementById('top-btn');
+  addEventListener('scroll', () => {
+    bar.style.transform = `scaleX(${scrollY / (document.documentElement.scrollHeight - innerHeight || 1)})`;
+    tb.classList.toggle('show', scrollY > 600);
+  }, { passive: true });
+  tb.onclick = () => scrollTo({ top: 0 });
+
+  // cursor glow on channel cards
+  $('.channel').forEach(c => c.addEventListener('pointermove', e => {
+    const r = c.getBoundingClientRect();
+    c.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+    c.style.setProperty('--my', (e.clientY - r.top) + 'px');
+  }));
+
+  // copy email
+  const copy = document.getElementById('copy');
+  copy.onclick = async () => {
+    const mail = document.getElementById('mail').textContent;
+    try { await navigator.clipboard.writeText(mail); copy.textContent = 'Copied'; }
+    catch { copy.textContent = 'Press Ctrl+C'; const r = document.createRange(); r.selectNode(document.getElementById('mail')); getSelection().removeAllRanges(); getSelection().addRange(r); }
+    setTimeout(() => copy.textContent = 'Copy email', 1800);
+  };
+
+  // form: send without leaving the page
+  const form = document.getElementById('contactForm'), note = document.getElementById('formNote'), btn = document.getElementById('sendBtn');
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    btn.disabled = true; btn.firstChild.textContent = 'Sending... '; note.className = 'status'; note.textContent = '';
+    try {
+      const res = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' } });
+      if (!res.ok) throw new Error();
+      form.reset(); note.className = 'status ok'; note.textContent = 'Message sent. Thank you, I will reply soon.';
+    } catch {
+      note.className = 'status err'; note.textContent = 'Could not send. Please email me directly at pintoleonarrd@gmail.com.';
+    }
+    btn.disabled = false; btn.firstChild.textContent = 'Send message ';
+  });
+
+  // luminous white/silver particle field (same as home page)
+  const cv = document.getElementById('flow'), cx = cv.getContext('2d');
+  let W, H, P = [], t = 0, m = { x: -9e3, y: -9e3 };
+  const N = innerWidth < 620 ? 1500 : 2800;
+  const spawn = p => { const a = Math.random() * 6.283, r = Math.sqrt(Math.random()) * .46;
+    p.x = p.px = W / 2 + Math.cos(a) * r * W; p.y = p.py = H / 2 + Math.sin(a) * r * H; p.l = 90 + Math.random() * 360; p.g = Math.random() * 3 | 0; return p; };
+  const size = () => { const d = Math.min(devicePixelRatio || 1, 2); W = cv.clientWidth; H = cv.clientHeight; cv.width = W * d; cv.height = H * d; cx.setTransform(d, 0, 0, d, 0, 0);
+    P = Array.from({ length: N }, () => spawn({})); };
+  size(); addEventListener('resize', size);
+  cv.addEventListener('pointermove', e => { const r = cv.getBoundingClientRect(); m.x = e.clientX - r.left; m.y = e.clientY - r.top; });
+  cv.addEventListener('pointerleave', () => { m.x = m.y = -9e3; });
+  const style = [['rgba(255,255,255,.6)', .9], ['rgba(205,210,226,.42)', .75], ['rgba(150,156,172,.3)', .65]];
+  const step = () => {
+    t += .005;
+    cx.globalCompositeOperation = 'destination-out'; cx.fillStyle = 'rgba(0,0,0,.09)'; cx.fillRect(0, 0, W, H);
+    cx.globalCompositeOperation = 'lighter';
+    const k = 6.283 / (W * .55), cX = W / 2, cY = H / 2, paths = [new Path2D(), new Path2D(), new Path2D()];
+    for (const p of P) {
+      let u = Math.sin(p.y * k * 1.1 + t * 2) + .6 * Math.sin(p.y * k * 2.3 - p.x * k * .8 + t * 3.1) - (p.y - cY) / H * .9;
+      let w = Math.cos(p.x * k * .9 - t * 1.7) + .6 * Math.cos(p.x * k * 2.1 + p.y * k * 1.2 - t * 2.6) + (p.x - cX) / W * .9;
+      const dx = p.x - m.x, dy = p.y - m.y, d2 = dx * dx + dy * dy;
+      if (d2 < 14000) { const f = 1 - d2 / 14000; u += (-dy * .05 + dx * .02) * f; w += (dx * .05 + dy * .02) * f; }
+      p.px = p.x; p.py = p.y;
+      p.x += u * 1.15 - (p.x - cX) / W * .5; p.y += w * 1.15 - (p.y - cY) / H * .5;
+      const q = paths[p.g]; q.moveTo(p.px, p.py); q.lineTo(p.x, p.y);
+      const ex = (p.x - cX) / (W * .5), ey = (p.y - cY) / (H * .5);
+      if (--p.l < 0 || ex * ex + ey * ey > 1) spawn(p);
+    }
+    paths.forEach((q, i) => { cx.strokeStyle = style[i][0]; cx.lineWidth = style[i][1]; cx.stroke(q); });
+  };
+  if (reduce) for (let i = 0; i < 240; i++) step();
+  else (function loop() { step(); requestAnimationFrame(loop); })();
+})();
+</script>
+</body>
+</html>

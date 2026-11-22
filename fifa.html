@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="pinto-intro.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIFA Players SQL EDA | Pinto Leonard</title>
+<meta name="description" content="Exploratory Data Analysis on FIFA player attributes, ratings, market value, wage, and positions using SQL by Pinto Leonard.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#050505;
+  --s1:#0c0c0d;
+  --ink:#f4f4f5;
+  --muted:#8b8b93;
+  --silver:#d4d4d8;
+  --line:rgba(255,255,255,.09);
+  --line2:rgba(255,255,255,.17);
+  --card:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.012)),#0b0b0c;
+  --card-hover:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.025)),#101012;
+  --fade:linear-gradient(180deg,#fff 25%,#6c6c73);
+  --max:1160px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font:400 16px/1.65 Inter,-apple-system,BlinkMacSystemFont,sans-serif;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* 64px Square Grid + Subtle Radial Glow */
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-2;
+  background:
+    linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px) 0 0/64px 64px,
+    linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px) 0 0/64px 64px;
+  -webkit-mask-image:radial-gradient(ellipse at 50% 25%,#000 15%,transparent 75%);
+  mask-image:radial-gradient(ellipse at 50% 25%,#000 15%,transparent 75%);
+}
+body:after{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:
+    radial-gradient(60% 45% at 50% 0,rgba(255,255,255,.11),transparent 70%),
+    radial-gradient(40% 40% at 88% 55%,rgba(190,195,210,.07),transparent 70%);
+}
+
+a{color:inherit;text-decoration:none}
+a:focus-visible,button:focus-visible{outline:2px solid #fff;outline-offset:4px;border-radius:10px}
+h1,h2,h3,.brand,.font-display{font-family:"Inter Tight",Inter,sans-serif;font-weight:600;line-height:1.08}
+
+.wrap{width:min(var(--max),calc(100% - 44px));margin:auto}
+
+/* Scroll Progress & Back-to-Top */
+#bar{
+  position:fixed;top:0;left:0;height:2px;width:100%;
+  background:#fff;transform-origin:left;transform:scaleX(0);z-index:60;
+}
+#top-btn{
+  position:fixed;right:22px;bottom:22px;width:46px;height:46px;border-radius:50%;
+  border:1px solid var(--line2);background:rgba(16,16,17,.85);backdrop-filter:blur(10px);
+  color:#fff;font-size:20px;cursor:pointer;z-index:45;opacity:0;transform:translateY(20px);
+  pointer-events:none;transition:.35s;
+}
+#top-btn.show{opacity:1;transform:none;pointer-events:auto}
+#top-btn:hover{background:#fff;color:#050505}
+
+/* Sticky Pill Nav */
+header{position:sticky;top:12px;z-index:30;margin-top:12px}
+nav{
+  min-height:58px;padding:0 9px 0 24px;display:flex;align-items:center;
+  justify-content:space-between;gap:20px;background:rgba(14,14,15,.72);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border:1px solid var(--line);border-radius:999px;
+}
+.brand{font-size:21px;letter-spacing:-.04em}
+nav ul{display:flex;gap:22px;list-style:none}
+nav ul a{font-size:14px;font-weight:500;color:var(--muted);transition:color .2s}
+nav ul a:hover,nav ul a.active{color:#fff}
+.nav-cta{
+  font-size:14px;font-weight:600;color:#050505;background:#fff;
+  padding:10px 18px;border-radius:999px;transition:box-shadow .25s;white-space:nowrap;
+}
+.nav-cta:hover{box-shadow:0 0 26px rgba(255,255,255,.45)}
+
+.pill{
+  display:inline-flex;align-items:center;gap:9px;padding:6px 14px;
+  border:1px solid var(--line2);border-radius:999px;background:rgba(255,255,255,.05);
+  font-size:12.5px;font-weight:500;color:var(--silver);margin-bottom:18px;
+}
+.pill-sq{
+  width:7px;height:7px;border-radius:2px;background:#fff;
+  box-shadow:0 0 10px rgba(255,255,255,.7);
+}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  padding:13px 22px;border-radius:999px;font-weight:600;font-size:14px;
+  cursor:pointer;transition:transform .25s,box-shadow .25s,background .25s,border-color .25s;
+}
+.btn:hover{transform:translateY(-3px)}
+.btn-primary{background:#fff;color:#050505;box-shadow:0 8px 30px rgba(255,255,255,.18);border:none}
+.btn-primary:hover{box-shadow:0 12px 40px rgba(255,255,255,.35)}
+.btn-ghost{background:rgba(255,255,255,.05);border:1px solid var(--line2);color:var(--ink)}
+.btn-ghost:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.35)}
+
+/* Introduction + Floating SQL, Football & Chart Symbols */
+.hero-intro{padding:78px 0 72px}
+.hero-grid{
+  display:grid;
+  grid-template-columns:1.15fr .85fr;
+  gap:40px;
+  align-items:center;
+}
+.hero-intro h1{
+  font-size:clamp(40px,5.6vw,68px);
+  letter-spacing:-.045em;
+  margin-bottom:18px;
+}
+.gradient{
+  background:linear-gradient(180deg,#d9d9de,#5f5f66);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero-lead{
+  max-width:600px;color:var(--muted);font-size:17px;line-height:1.7;margin-bottom:28px;
+}
+.actions{display:flex;flex-wrap:wrap;gap:12px}
+
+.float-symbols{
+  position:relative;
+  min-height:320px;
+  display:grid;
+  place-items:center;
+}
+.symbol-stage{
+  position:relative;
+  width:100%;
+  max-width:380px;
+  height:310px;
+  border-radius:24px;
+  border:1px solid var(--line);
+  background:var(--card);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 24px 60px rgba(0,0,0,.65);
+  overflow:hidden;
+}
+.sym-badge{
+  position:absolute;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:12px 18px;
+  border-radius:16px;
+  background:rgba(14,14,16,.92);
+  border:1px solid var(--line2);
+  color:#fff;
+  font-family:"JetBrains Mono",monospace;
+  font-size:13px;
+  font-weight:600;
+  box-shadow:0 14px 34px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.1);
+}
+.sym-icon{font-size:22px;line-height:1}
+.sym-sql{top:26px;left:24px;animation:driftA 5.8s ease-in-out infinite}
+.sym-ball{
+  top:50%;right:24px;transform:translateY(-50%);
+  padding:16px 20px;border-radius:20px;border-color:rgba(255,255,255,.32);
+  animation:driftB 6.4s ease-in-out infinite;
+}
+.sym-chart{bottom:26px;left:44px;animation:driftC 5.2s ease-in-out infinite}
+
+@keyframes driftA{0%,100%{transform:translate(0,0)}50%{transform:translate(6px,-10px)}}
+@keyframes driftB{0%,100%{transform:translate(0,-50%)}50%{transform:translate(-7px,calc(-50% - 9px))}}
+@keyframes driftC{0%,100%{transform:translate(0,0)}50%{transform:translate(8px,8px)}}
+
+section{padding:84px 0;border-top:1px solid var(--line)}
+.section-head{max-width:740px;margin-bottom:38px}
+.section-head h2{
+  font-size:clamp(30px,4.2vw,46px);letter-spacing:-.04em;margin-bottom:12px;
+  background:var(--fade);-webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.section-head p{color:var(--muted);font-size:16.5px}
+
+/* SQL Workbench */
+.workbench{
+  display:grid;grid-template-columns:320px 1fr;gap:22px;align-items:start;
+}
+.query-rail{
+  display:flex;flex-direction:column;gap:8px;
+  background:var(--card);border:1px solid var(--line);border-radius:22px;padding:14px;
+}
+.rail-btn{
+  text-align:left;padding:13px 16px;border-radius:14px;border:1px solid transparent;
+  background:transparent;color:var(--muted);font-family:Inter,sans-serif;
+  font-size:14px;font-weight:500;cursor:pointer;transition:all .25s;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.rail-btn:hover{color:#fff;background:rgba(255,255,255,.04);transform:translateX(3px)}
+.rail-btn.active{
+  color:#050505;background:#fff;font-weight:600;
+  box-shadow:0 6px 20px rgba(255,255,255,.15);
+}
+
+.sql-panel{
+  background:var(--card);border:1px solid var(--line2);border-radius:22px;padding:28px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07);
+}
+.sql-panel-top{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  flex-wrap:wrap;margin-bottom:14px;
+}
+.sql-panel-top h3{font-size:22px;color:#fff}
+.sql-panel p{color:var(--muted);font-size:14.8px;margin-bottom:16px}
+.code-frame{
+  background:#060607;border:1px solid var(--line);border-radius:16px;overflow:hidden;
+}
+.code-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px;background:rgba(255,255,255,.04);border-bottom:1px solid var(--line);
+  font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--silver);
+}
+.copy-btn{
+  padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.08);
+  border:1px solid var(--line2);color:#fff;font-size:12px;font-weight:600;cursor:pointer;
+  transition:.2s;
+}
+.copy-btn:hover{background:#fff;color:#050505}
+.code-frame pre{
+  padding:18px;font-family:"JetBrains Mono",monospace;font-size:13px;line-height:1.68;
+  color:var(--silver);overflow-x:auto;white-space:pre;
+}
+
+/* Graphical Finding Cards with Motion Bars & Telemetry Meters */
+.graphics-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:18px;
+}
+.graphic-card{
+  position:relative;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:22px;
+  padding:26px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+  overflow:hidden;
+  transition:transform .35s cubic-bezier(.16,1,.3,1),border-color .3s,background .3s;
+}
+.graphic-card:hover{
+  transform:translateY(-6px);
+  border-color:var(--line2);
+  background:var(--card-hover);
+}
+.g-top{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin-bottom:14px;
+}
+.g-code{
+  font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:600;
+  color:var(--silver);padding:5px 11px;border-radius:999px;
+  background:rgba(255,255,255,.06);border:1px solid var(--line2);
+}
+.g-metric{
+  font-family:"Inter Tight",sans-serif;font-size:24px;font-weight:700;color:#fff;
+}
+.graphic-card h3{font-size:21px;color:#fff;margin-bottom:8px}
+.graphic-card p{color:var(--muted);font-size:14.5px;margin-bottom:18px}
+
+/* Animated Equalizer / Signal Bars inside Graphical Cards */
+.signal-bars{
+  display:flex;align-items:flex-end;gap:7px;height:54px;
+  padding:10px 14px;border-radius:14px;
+  background:rgba(0,0,0,.45);border:1px solid var(--line);
+}
+.signal-bars i{
+  flex:1;
+  border-radius:4px 4px 1px 1px;
+  background:linear-gradient(180deg,#ffffff,#686870);
+  transform-origin:bottom;
+  animation:eqPulse 2.4s ease-in-out infinite alternate;
+}
+.signal-bars i:nth-child(1){height:32%;animation-delay:0s}
+.signal-bars i:nth-child(2){height:54%;animation-delay:-.2s}
+.signal-bars i:nth-child(3){height:78%;animation-delay:-.4s}
+.signal-bars i:nth-child(4){height:94%;animation-delay:-.6s}
+.signal-bars i:nth-child(5){height:66%;animation-delay:-.8s}
+.signal-bars i:nth-child(6){height:46%;animation-delay:-1s}
+.signal-bars i:nth-child(7){height:84%;animation-delay:-1.2s}
+.signal-bars i:nth-child(8){height:58%;animation-delay:-1.4s}
+
+@keyframes eqPulse{
+  0%{transform:scaleY(.55);opacity:.65}
+  100%{transform:scaleY(1);opacity:1}
+}
+
+/* Progress Track with Moving Glint */
+.meter-track{
+  position:relative;height:8px;border-radius:999px;
+  background:rgba(255,255,255,.08);overflow:hidden;margin-top:14px;
+}
+.meter-fill{
+  height:100%;border-radius:999px;background:#fff;
+  position:relative;overflow:hidden;
+}
+.meter-fill:after{
+  content:"";position:absolute;inset:0;width:45%;
+  background:linear-gradient(90deg,transparent,rgba(5,5,5,.45),transparent);
+  animation:glint 2.6s linear infinite;
+}
+@keyframes glint{0%{transform:translateX(-120%)}100%{transform:translateX(280%)}}
+
+/* Chart + Table Split */
+.charts-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px}
+.chart-card{
+  background:var(--card);border:1px solid var(--line);border-radius:22px;padding:24px;
+}
+.chart-card h3{font-size:18px;color:#fff;margin-bottom:4px}
+.chart-card p{font-size:13.5px;color:var(--muted);margin-bottom:14px}
+.chart-box{position:relative;height:260px;width:100%}
+
+.table-wrap{
+  overflow-x:auto;border-radius:22px;border:1px solid var(--line);background:var(--card);
+}
+table{width:100%;border-collapse:collapse;min-width:580px}
+th{
+  text-align:left;padding:14px 20px;font-family:"JetBrains Mono",monospace;
+  font-size:12px;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--silver);background:rgba(255,255,255,.04);border-bottom:1px solid var(--line);
+}
+td{
+  padding:14px 20px;border-bottom:1px solid var(--line);font-size:14.5px;color:var(--muted);
+}
+td strong{color:var(--ink)}
+tbody tr:last-child td{border-bottom:none}
+code{
+  font-family:"JetBrains Mono",monospace;font-size:12.5px;padding:2px 6px;
+  border-radius:6px;background:rgba(255,255,255,.07);color:#fff;
+}
+
+/* CTA & Footer */
+.cta-box{
+  position:relative;overflow:hidden;
+  background:radial-gradient(60% 120% at 80% 0,rgba(255,255,255,.12),transparent 70%),var(--card);
+  border:1px solid var(--line2);border-radius:28px;padding:42px;
+  display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;
+}
+.cta-box h2{
+  font-size:32px;letter-spacing:-.035em;margin-bottom:8px;
+  background:var(--fade);-webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.cta-box p{color:var(--muted);max-width:560px}
+
+footer{padding:35px 0 0;color:var(--muted);font-size:13px;border-top:1px solid var(--line);overflow:hidden}
+.footer-row{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.footer-links{display:flex;gap:20px;font-weight:500}
+.footer-links a:hover{color:#fff}
+.mark{
+  font:700 clamp(70px,17vw,230px)/.85 "Inter Tight";letter-spacing:-.06em;
+  text-align:center;margin-top:34px;height:.62em;overflow:hidden;white-space:nowrap;
+  background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0) 85%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;user-select:none;
+}
+
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
+.reveal.visible{opacity:1;transform:none}
+
+@media(prefers-reduced-motion:reduce){
+  *{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}
+  .reveal{opacity:1;transform:none}
+}
+@media(max-width:960px){
+  .hero-grid,.workbench,.graphics-grid,.charts-2{grid-template-columns:1fr}
+  .float-symbols{min-height:260px}
+}
+@media(max-width:680px){
+  .wrap{width:calc(100% - 32px)}
+  nav{padding-left:18px}
+  nav ul{display:none}
+  section{padding:64px 0}
+  #top-btn{right:14px;bottom:14px}
+}
+</style>
+</head>
+<body>
+
+<div id="bar"></div>
+<button id="top-btn" aria-label="Back to top">↑</button>
+
+<header>
+  <div class="wrap">
+    <nav aria-label="Main navigation">
+      <a class="brand" href="index.html#top">Pinto<span>.</span></a>
+      <ul>
+        <li><a href="#overview">Introduction</a></li>
+        <li><a href="#sql-lab">SQL Lab</a></li>
+        <li><a href="#findings">Visual Findings</a></li>
+        <li><a href="#breakdown">Charts &amp; Schema</a></li>
+      </ul>
+      <a class="nav-cta" href="Project.html">← Projects</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- INTRODUCTION + FLOATING SQL, FOOTBALL & CHART SYMBOLS -->
+  <section class="hero-intro" id="overview" style="border-top:none">
+    <div class="wrap hero-grid">
+      <div class="reveal">
+        <div class="pill"><span class="pill-sq"></span> SQL Exploratory Data Analysis · Introduction</div>
+        <h1>FIFA Players<br><span class="gradient">SQL Exploratory Analysis.</span></h1>
+        <p class="hero-lead">Structured SQL querying over football player rosters to uncover overall rating distributions, positional strengths, value-versus-wage outliers, and nationality depth.</p>
+
+        <div class="actions">
+          <a class="btn btn-primary" href="#sql-lab">Explore SQL Queries ↓</a>
+          <a class="btn btn-ghost" href="https://github.com/datajutsu-jpl/FIFA-Players-SQL-EDA" target="_blank" rel="noopener">View SQL Repo on GitHub ↗</a>
+        </div>
+      </div>
+
+      <div class="float-symbols reveal" aria-hidden="true">
+        <div class="symbol-stage">
+          <div class="sym-badge sym-sql"><span class="sym-icon">🗄️</span><span>SQL</span></div>
+          <div class="sym-badge sym-ball"><span class="sym-icon">⚽</span><span>FOOTBALL</span></div>
+          <div class="sym-badge sym-chart"><span class="sym-icon">📊</span><span>CHART</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ASYMMETRIC TWO-COLUMN SQL WORKBENCH -->
+  <section id="sql-lab">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="pill">01 · Query Workbench</div>
+        <h2>SQL patterns used across the analysis</h2>
+        <p>Select a query pattern on the left to inspect how aggregations, ranking window functions, and value/wage comparisons are structured.</p>
+      </div>
+
+      <div class="workbench reveal">
+        <div class="query-rail" role="tablist" aria-label="SQL query patterns">
+          <button class="rail-btn active" type="button" onclick="selectSql(0, this)">01 · Top Rated by Position <span>→</span></button>
+          <button class="rail-btn" type="button" onclick="selectSql(1, this)">02 · Value vs. Wage Efficiency <span>→</span></button>
+          <button class="rail-btn" type="button" onclick="selectSql(2, this)">03 · Age &amp; Potential Curve <span>→</span></button>
+          <button class="rail-btn" type="button" onclick="selectSql(3, this)">04 · Nationality Depth <span>→</span></button>
+        </div>
+
+        <div class="sql-panel" id="sqlPanel">
+          <div class="sql-panel-top">
+            <h3 id="sqlTitle">Top Rated Players per Position (Window Ranking)</h3>
+            <button class="copy-btn" type="button" onclick="copySql()">Copy SQL</button>
+          </div>
+          <p id="sqlDesc">Uses <code>DENSE_RANK()</code> partitioned by primary position to isolate stand-out players without losing tie visibility.</p>
+          <div class="code-frame">
+            <div class="code-bar">
+              <span id="sqlFile">01_top_by_position.sql</span>
+              <span>ANSI SQL / CTE</span>
+            </div>
+            <pre id="sqlCode">WITH ranked_players AS (
+  SELECT
+    player_name,
+    nationality,
+    best_position,
+    overall_rating,
+    potential_rating,
+    DENSE_RANK() OVER (
+      PARTITION BY best_position
+      ORDER BY overall_rating DESC, potential_rating DESC
+    ) AS pos_rank
+  FROM fifa_players
+  WHERE overall_rating IS NOT NULL
+)
+SELECT
+  best_position,
+  pos_rank,
+  player_name,
+  nationality,
+  overall_rating,
+  potential_rating
+FROM ranked_players
+WHERE pos_rank &lt;= 3
+ORDER BY best_position, pos_rank;</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GRAPHICAL FINDINGS CARDS WITH MOTION -->
+  <section id="findings">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="pill">02 · Graphical Takeaways</div>
+        <h2>Key EDA findings in motion</h2>
+        <p>Graphical motion meters and live signal bars illustrate distribution shape, growth gap, valuation ratio, and cohort depth.</p>
+      </div>
+
+      <div class="graphics-grid reveal">
+        <article class="graphic-card">
+          <div class="g-top">
+            <span class="g-code">01 · RATING DISTRIBUTION</span>
+            <span class="g-metric">Right-Tail</span>
+          </div>
+          <h3>Elite Ratings Are Concentrated at the Top</h3>
+          <p>Most players sit in mid-tier overall bands while top-rated standouts form a compact upper tier.</p>
+          <div class="signal-bars" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
+          <div class="meter-track"><div class="meter-fill" style="width:84%"></div></div>
+        </article>
+
+        <article class="graphic-card">
+          <div class="g-top">
+            <span class="g-code">02 · AGE &amp; POTENTIAL</span>
+            <span class="g-metric">U21 → Peak</span>
+          </div>
+          <h3>Potential Headroom Narrows as Age Rises</h3>
+          <p>Younger squads carry wider potential-minus-overall gaps, while peak-age players convert potential into current rating.</p>
+          <div class="signal-bars" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
+          <div class="meter-track"><div class="meter-fill" style="width:72%"></div></div>
+        </article>
+
+        <article class="graphic-card">
+          <div class="g-top">
+            <span class="g-code">03 · VALUE VS. WAGE</span>
+            <span class="g-metric">NULLIF()</span>
+          </div>
+          <h3>Valuation vs. Wage Surfaces Cost Outliers</h3>
+          <p>Comparing transfer value against weekly wage with zero-division guards highlights efficient roster profiles.</p>
+          <div class="signal-bars" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
+          <div class="meter-track"><div class="meter-fill" style="width:78%"></div></div>
+        </article>
+
+        <article class="graphic-card">
+          <div class="g-top">
+            <span class="g-code">04 · NATIONS &amp; ROLES</span>
+            <span class="g-metric">HAVING N</span>
+          </div>
+          <h3>Sample Thresholds Prevent Ranking Skew</h3>
+          <p>Filtering out tiny country or club sample sizes keeps positional and national averages reliable.</p>
+          <div class="signal-bars" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
+          <div class="meter-track"><div class="meter-fill" style="width:68%"></div></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHARTS & SCHEMA SUMMARY -->
+  <section id="breakdown">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="pill">03 · Charts &amp; Schema</div>
+        <h2>Visual distribution &amp; SQL dimension coverage</h2>
+        <p>Swap sample chart values with exact numbers from your SQL query exports when updating final repository metrics.</p>
+      </div>
+
+      <div class="charts-2 reveal">
+        <div class="chart-card">
+          <h3>Average Rating by Role Group</h3>
+          <p>Sample comparative breakdown across tactical groups</p>
+          <div class="chart-box"><canvas id="roleChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Player Pool by Age Bracket</h3>
+          <p>Sample cohort distribution across career stages</p>
+          <div class="chart-box"><canvas id="ageChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table>
+          <thead>
+            <tr>
+              <th>Analysis Dimension</th>
+              <th>Fields Explored</th>
+              <th>SQL Technique</th>
+              <th>Analytical Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Ability &amp; Growth</strong></td>
+              <td>Overall, Potential, Age</td>
+              <td><code>CASE</code> buckets, <code>AVG()</code>, <code>DENSE_RANK()</code></td>
+              <td>Compare current ability against remaining upside</td>
+            </tr>
+            <tr>
+              <td><strong>Economics</strong></td>
+              <td>Value, Wage, Release Clause</td>
+              <td>CTEs, ratios, <code>NULLIF()</code> guards</td>
+              <td>Identify high-cost or high-value outliers</td>
+            </tr>
+            <tr>
+              <td><strong>Role &amp; Origin</strong></td>
+              <td>Position, Nationality, Club</td>
+              <td><code>GROUP BY</code>, <code>COUNT()</code>, <code>HAVING</code></td>
+              <td>Prevent small-sample skew in averages</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section>
+    <div class="wrap">
+      <div class="cta-box reveal">
+        <div>
+          <div class="pill">Repository</div>
+          <h2>Explore the FIFA SQL EDA scripts</h2>
+          <p>Review the queries, documentation, and exploratory analysis structure on GitHub.</p>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <a class="btn btn-primary" href="https://github.com/datajutsu-jpl/FIFA-Players-SQL-EDA" target="_blank" rel="noopener">Open GitHub Repo ↗</a>
+          <a class="btn btn-ghost" href="get_in_touch.html">Let's connect ↗</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap footer-row">
+    <span>© 2026 Pinto Leonard · FIFA Players SQL EDA Case Study</span>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="Project.html">All Projects</a>
+      <a href="https://github.com/datajutsu-jpl/FIFA-Players-SQL-EDA" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+  <div class="mark" aria-hidden="true">Pinto Leonard</div>
+</footer>
+
+<script>
+const bar = document.getElementById('bar'), tb = document.getElementById('top-btn');
+window.addEventListener('scroll', () => {
+  bar.style.transform = `scaleX(${scrollY / (document.documentElement.scrollHeight - innerHeight || 1)})`;
+  tb.classList.toggle('show', scrollY > 600);
+}, { passive: true });
+tb.onclick = () => scrollTo({ top: 0 });
+
+const navLinks = [...document.querySelectorAll('nav ul a')];
+const so = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+  });
+}, { rootMargin: '-45% 0px -50% 0px' });
+document.querySelectorAll('section[id]').forEach(s => so.observe(s));
+
+const io = new IntersectionObserver((entries, obs) => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add('visible');
+    obs.unobserve(e.target);
+  });
+}, { threshold: 0.14 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+// SQL Workbench Switcher
+const sqlQueries = [
+  {
+    title: 'Top Rated Players per Position (Window Ranking)',
+    desc: 'Uses DENSE_RANK() partitioned by primary position to isolate stand-out players without losing tie visibility.',
+    file: '01_top_by_position.sql',
+    code: `WITH ranked_players AS (
+  SELECT
+    player_name,
+    nationality,
+    best_position,
+    overall_rating,
+    potential_rating,
+    DENSE_RANK() OVER (
+      PARTITION BY best_position
+      ORDER BY overall_rating DESC, potential_rating DESC
+    ) AS pos_rank
+  FROM fifa_players
+  WHERE overall_rating IS NOT NULL
+)
+SELECT
+  best_position,
+  pos_rank,
+  player_name,
+  nationality,
+  overall_rating,
+  potential_rating
+FROM ranked_players
+WHERE pos_rank <= 3
+ORDER BY best_position, pos_rank;`
+  },
+  {
+    title: 'Value vs. Wage Efficiency Check',
+    desc: 'Guards against division by zero with NULLIF() when comparing player valuation against weekly wages.',
+    file: '02_value_to_wage.sql',
+    code: `SELECT
+  player_name,
+  age,
+  overall_rating,
+  value_eur,
+  wage_eur,
+  ROUND(value_eur / NULLIF(wage_eur, 0), 2) AS value_per_wage_unit
+FROM fifa_players
+WHERE wage_eur > 0
+ORDER BY overall_rating DESC, value_per_wage_unit DESC
+LIMIT 20;`
+  },
+  {
+    title: 'Age Bracket & Growth Potential Summary',
+    desc: 'Segments players into career stages to compare average rating, potential ceiling, and growth headroom.',
+    file: '03_age_potential_curve.sql',
+    code: `SELECT
+  CASE
+    WHEN age <= 21 THEN 'U21 Prospect'
+    WHEN age <= 26 THEN 'Prime Build (22-26)'
+    WHEN age <= 31 THEN 'Peak Window (27-31)'
+    ELSE 'Veteran (32+)'
+  END AS age_bucket,
+  COUNT(*) AS player_count,
+  ROUND(AVG(overall_rating), 1) AS avg_overall,
+  ROUND(AVG(potential_rating - overall_rating), 1) AS avg_growth_gap
+FROM fifa_players
+GROUP BY 1
+ORDER BY avg_overall DESC;`
+  },
+  {
+    title: 'Nationality Depth with Minimum Sample Filter',
+    desc: 'Applies HAVING COUNT(*) so country averages reflect meaningful player pools rather than single-player outliers.',
+    file: '04_nationality_depth.sql',
+    code: `SELECT
+  nationality,
+  COUNT(*) AS total_players,
+  ROUND(AVG(overall_rating), 2) AS avg_rating,
+  MAX(overall_rating) AS peak_rating
+FROM fifa_players
+GROUP BY nationality
+HAVING COUNT(*) >= 25
+ORDER BY avg_rating DESC, total_players DESC;`
+  }
+];
+
+function selectSql(idx, btn) {
+  document.querySelectorAll('.rail-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const item = sqlQueries[idx];
+  document.getElementById('sqlTitle').textContent = item.title;
+  document.getElementById('sqlDesc').innerHTML = item.desc;
+  document.getElementById('sqlFile').textContent = item.file;
+  document.getElementById('sqlCode').textContent = item.code;
+}
+
+function copySql() {
+  const txt = document.getElementById('sqlCode').innerText;
+  const btn = document.querySelector('.copy-btn');
+  navigator.clipboard.writeText(txt).then(() => {
+    const prev = btn.textContent;
+    btn.textContent = '✓ Copied';
+    setTimeout(() => btn.textContent = prev, 1400);
+  });
+}
+
+// Monochrome Charts
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof Chart === 'undefined') return;
+  Chart.defaults.color = '#8b8b93';
+  Chart.defaults.font.family = "'Inter', sans-serif";
+
+  new Chart(document.getElementById('roleChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: ['Forwards', 'Midfielders', 'Defenders', 'Goalkeepers'],
+      datasets: [{
+        label: 'Avg Rating (Sample)',
+        data: [74, 73, 72, 71],
+        backgroundColor: ['rgba(255,255,255,.85)', 'rgba(212,212,216,.65)', 'rgba(161,161,170,.48)', 'rgba(113,113,122,.35)'],
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0c0c0d', borderColor: 'rgba(255,255,255,.2)', borderWidth: 1 } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#d4d4d8' } },
+        y: { min: 60, max: 85, grid: { color: 'rgba(255,255,255,.06)' } }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('ageChart').getContext('2d'), {
+    type: 'doughnut',
+    data: {
+      labels: ['U21', '22–26', '27–31', '32+'],
+      datasets: [{
+        data: [24, 38, 26, 12],
+        backgroundColor: ['#ffffff', '#a1a1aa', '#71717a', '#3f3f46'],
+        borderColor: '#0b0b0c', borderWidth: 3
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '64%',
+      plugins: {
+        legend: { position: 'right', labels: { color: '#d4d4d8', usePointStyle: true, pointStyle: 'rectRounded', padding: 14 } },
+        tooltip: { backgroundColor: '#0c0c0d', borderColor: 'rgba(255,255,255,.2)', borderWidth: 1 }
+      }
+    }
+  });
+});
+</script>
+</body>
+</html>

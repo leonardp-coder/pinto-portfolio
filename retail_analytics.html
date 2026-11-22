@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="pinto-intro.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retail Analytics Dashboard | Pinto Leonard</title>
+<meta name="description" content="Retail Analytics Dashboard case study by Pinto Leonard — multi-year sales, margin, regional, and customer performance analytics.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#050505;
+  --s1:#0c0c0d;
+  --ink:#f4f4f5;
+  --muted:#8b8b93;
+  --silver:#d4d4d8;
+  --line:rgba(255,255,255,.09);
+  --line2:rgba(255,255,255,.17);
+  --card:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.012)),#0b0b0c;
+  --card-hover:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.025)),#101012;
+  --fade:linear-gradient(180deg,#fff 25%,#6c6c73);
+  --max:1160px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font:400 16px/1.65 Inter,-apple-system,BlinkMacSystemFont,sans-serif;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* 64px Square Grid + Subtle Top Glow (No Dots) */
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-2;
+  background:
+    linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px) 0 0/64px 64px,
+    linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px) 0 0/64px 64px;
+  -webkit-mask-image:radial-gradient(ellipse at 50% 25%,#000 15%,transparent 75%);
+  mask-image:radial-gradient(ellipse at 50% 25%,#000 15%,transparent 75%);
+}
+body:after{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:
+    radial-gradient(60% 45% at 50% 0,rgba(255,255,255,.11),transparent 70%),
+    radial-gradient(40% 40% at 88% 55%,rgba(190,195,210,.07),transparent 70%);
+}
+
+a{color:inherit;text-decoration:none}
+a:focus-visible,button:focus-visible{outline:2px solid #fff;outline-offset:4px;border-radius:10px}
+h1,h2,h3,.brand,.font-display{font-family:"Inter Tight",Inter,sans-serif;font-weight:600;line-height:1.08}
+
+.wrap{width:min(var(--max),calc(100% - 44px));margin:auto}
+
+/* Top Progress Bar & Back-to-Top */
+#bar{
+  position:fixed;
+  top:0;
+  left:0;
+  height:2px;
+  width:100%;
+  background:#fff;
+  transform-origin:left;
+  transform:scaleX(0);
+  z-index:60;
+}
+#top-btn{
+  position:fixed;
+  right:22px;
+  bottom:22px;
+  width:46px;
+  height:46px;
+  border-radius:50%;
+  border:1px solid var(--line2);
+  background:rgba(16,16,17,.85);
+  backdrop-filter:blur(10px);
+  color:#fff;
+  font-size:20px;
+  cursor:pointer;
+  z-index:45;
+  opacity:0;
+  transform:translateY(20px);
+  pointer-events:none;
+  transition:.35s;
+}
+#top-btn.show{opacity:1;transform:none;pointer-events:auto}
+#top-btn:hover{background:#fff;color:#050505}
+
+/* Sticky Pill Navigation */
+header{position:sticky;top:12px;z-index:30;margin-top:12px}
+nav{
+  min-height:58px;
+  padding:0 9px 0 24px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  background:rgba(14,14,15,.72);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  border:1px solid var(--line);
+  border-radius:999px;
+}
+.brand{font-size:21px;letter-spacing:-.04em}
+nav ul{display:flex;gap:22px;list-style:none}
+nav ul a{font-size:14px;font-weight:500;color:var(--muted);transition:color .2s}
+nav ul a:hover,nav ul a.active{color:#fff}
+.nav-cta{
+  font-size:14px;
+  font-weight:600;
+  color:#050505;
+  background:#fff;
+  padding:10px 18px;
+  border-radius:999px;
+  transition:box-shadow .25s;
+  white-space:nowrap;
+}
+.nav-cta:hover{box-shadow:0 0 26px rgba(255,255,255,.45)}
+
+/* Pills & Buttons */
+.pill{
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  padding:6px 14px;
+  border:1px solid var(--line2);
+  border-radius:999px;
+  background:rgba(255,255,255,.05);
+  font-size:12.5px;
+  font-weight:500;
+  color:var(--silver);
+  margin-bottom:20px;
+}
+.pill-square{
+  width:7px;
+  height:7px;
+  border-radius:2px;
+  background:#fff;
+  box-shadow:0 0 10px rgba(255,255,255,.7);
+  animation:pulseSq 2.2s infinite;
+}
+@keyframes pulseSq{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:.45;transform:scale(.85)}
+}
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  padding:13px 22px;
+  border-radius:999px;
+  font-weight:600;
+  font-size:14px;
+  cursor:pointer;
+  transition:transform .25s,box-shadow .25s,background .25s,border-color .25s;
+}
+.btn:hover{transform:translateY(-3px)}
+.btn-primary{background:#fff;color:#050505;box-shadow:0 8px 30px rgba(255,255,255,.18);border:none}
+.btn-primary:hover{box-shadow:0 12px 40px rgba(255,255,255,.35)}
+.btn-ghost{background:rgba(255,255,255,.05);border:1px solid var(--line2);color:var(--ink)}
+.btn-ghost:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.35)}
+
+/* Hero Section */
+.hero{padding:76px 0 84px}
+.hero-split{
+  display:grid;
+  grid-template-columns:1.15fr .85fr;
+  gap:44px;
+  align-items:center;
+  margin-bottom:54px;
+}
+.hero h1{
+  font-size:clamp(38px,5.2vw,66px);
+  letter-spacing:-.045em;
+  margin-bottom:20px;
+}
+.gradient{
+  background:linear-gradient(180deg,#d9d9de,#5f5f66);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+.hero-lead{
+  color:var(--muted);
+  font-size:17px;
+  line-height:1.72;
+  margin-bottom:26px;
+  max-width:580px;
+}
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:28px}
+.tech-stack{display:flex;flex-wrap:wrap;gap:9px}
+.tech-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 15px;
+  border-radius:999px;
+  background:var(--card);
+  border:1px solid var(--line);
+  font-size:13px;
+  font-weight:500;
+  color:var(--silver);
+  transition:transform .25s,border-color .25s;
+}
+.tech-chip:hover{border-color:rgba(255,255,255,.35);transform:translateY(-2px)}
+
+/* Square Telemetry Stage (No Circles, No Dots) */
+.square-stage{
+  position:relative;
+  height:400px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.sq-frame{
+  position:absolute;
+  width:296px;
+  height:296px;
+  border-radius:28px;
+  border:1px solid var(--line);
+  background:radial-gradient(circle at 50% 40%,rgba(255,255,255,.07),transparent 72%);
+  transform:rotate(10deg);
+}
+.sq-frame-inner{
+  position:absolute;
+  width:214px;
+  height:214px;
+  border-radius:22px;
+  border:1px solid var(--line2);
+  transform:rotate(-8deg);
+}
+.float-tile{
+  position:absolute;
+  background:rgba(13,13,15,.9);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  border:1px solid var(--line2);
+  border-radius:18px;
+  padding:16px 20px;
+  box-shadow:0 22px 50px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.08);
+  transition:transform .3s ease,border-color .3s ease;
+}
+.float-tile:hover{border-color:#fff;z-index:10}
+.ft-center{width:270px;z-index:4;border-color:rgba(255,255,255,.32);animation:floatA 6s ease-in-out infinite}
+.ft-tl{top:10px;left:0;width:205px;z-index:3;animation:floatB 7s ease-in-out infinite}
+.ft-tr{top:24px;right:0;width:198px;z-index:3;animation:floatC 6.5s ease-in-out infinite}
+.ft-bl{bottom:14px;left:8px;width:212px;z-index:5;animation:floatC 7.4s ease-in-out infinite}
+.ft-br{bottom:8px;right:6px;width:206px;z-index:4;animation:floatB 6.8s ease-in-out infinite}
+
+@keyframes floatA{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes floatB{0%,100%{transform:translate(0,0)}50%{transform:translate(5px,-11px)}}
+@keyframes floatC{0%,100%{transform:translate(0,0)}50%{transform:translate(-5px,10px)}}
+
+.ft-kicker{
+  font-family:"JetBrains Mono",monospace;
+  font-size:11px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+  display:block;
+  margin-bottom:4px;
+}
+.ft-title{font-family:"Inter Tight",sans-serif;font-size:16.5px;font-weight:600;color:#fff}
+.ft-sub{font-size:12.5px;color:var(--muted);margin-top:2px}
+
+/* KPI Grid */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.kpi-card{
+  position:relative;
+  padding:24px 22px;
+  border-radius:22px;
+  background:var(--card);
+  border:1px solid var(--line);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+  transition:transform .35s cubic-bezier(.16,1,.3,1),border-color .3s;
+}
+.kpi-card:hover{transform:translateY(-6px);border-color:var(--line2)}
+.kpi-value{
+  font-family:"Inter Tight",sans-serif;
+  font-size:36px;
+  font-weight:700;
+  letter-spacing:-.04em;
+  color:#fff;
+  display:block;
+  margin-bottom:4px;
+}
+.kpi-label{font-size:13.5px;color:var(--muted);font-weight:500}
+
+/* Sections */
+section{padding:84px 0;border-top:1px solid var(--line)}
+.section-head{max-width:740px;margin-bottom:40px}
+.section-head h2{
+  font-size:clamp(30px,4.2vw,46px);
+  letter-spacing:-.04em;
+  margin-bottom:12px;
+  background:var(--fade);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+.section-head p{color:var(--muted);font-size:16.5px;line-height:1.7}
+
+/* Interactive Cards & Pop-Up Trigger Affordance */
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:22px;
+  padding:28px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+  transition:transform .35s cubic-bezier(.16,1,.3,1),border-color .3s,background .3s,box-shadow .3s;
+}
+.card:hover{
+  transform:translateY(-6px);
+  border-color:var(--line2);
+  background:var(--card-hover);
+  box-shadow:0 20px 44px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.1);
+}
+.card-interactive{cursor:pointer;position:relative}
+.card-interactive:hover{border-color:rgba(255,255,255,.35)}
+.card h3{font-size:20px;letter-spacing:-.025em;margin-bottom:12px;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.card p{color:var(--muted);font-size:14.8px;line-height:1.68}
+.popup-badge{
+  font-family:"JetBrains Mono",monospace;
+  font-size:11px;
+  font-weight:500;
+  color:var(--silver);
+  background:rgba(255,255,255,.07);
+  border:1px solid var(--line2);
+  padding:4px 10px;
+  border-radius:999px;
+  white-space:nowrap;
+  transition:background .2s,color .2s;
+}
+.card-interactive:hover .popup-badge{background:#fff;color:#050505}
+
+.styled-list{list-style:none;display:flex;flex-direction:column;gap:11px;margin-top:10px}
+.styled-list li{position:relative;padding-left:20px;color:var(--muted);font-size:14.5px;line-height:1.62}
+.styled-list li::before{content:"→";position:absolute;left:0;color:var(--silver);font-weight:600}
+.styled-list strong{color:var(--ink)}
+
+/* Pipeline Flow Strip */
+.architecture-box{
+  background:var(--card);
+  border:1px solid var(--line2);
+  border-radius:28px;
+  padding:36px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+}
+.pipeline-4{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+.pipe-step-card{
+  position:relative;
+  padding:22px 18px;
+  border:1px solid var(--line2);
+  background:rgba(0,0,0,.55);
+  border-radius:18px;
+  transition:transform .25s,border-color .25s;
+}
+.pipe-step-card:hover{transform:translateY(-6px);border-color:#fff}
+.pipe-tag{
+  display:inline-block;
+  font-family:"JetBrains Mono",monospace;
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:.1em;
+  color:var(--silver);
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--line);
+  padding:3px 10px;
+  border-radius:999px;
+  margin-bottom:12px;
+}
+.pipe-step-card b{display:block;font-family:"Inter Tight",sans-serif;font-size:17px;color:#fff;margin-bottom:6px}
+.pipe-step-card span{display:block;font-size:13px;color:var(--muted);line-height:1.5}
+.pipe-step-card:not(:last-child)::after{
+  content:"";
+  position:absolute;
+  left:100%;
+  top:50%;
+  width:22px;
+  height:1px;
+  background:linear-gradient(90deg,#fff,transparent);
+}
+
+/* Charts & Table */
+.charts-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:18px;margin-bottom:22px}
+.chart-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:22px;
+  padding:26px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+}
+.chart-header{margin-bottom:16px}
+.chart-header h3{font-size:18px;color:#fff;margin-bottom:4px}
+.chart-header p{font-size:13.5px;color:var(--muted)}
+.chart-wrap{position:relative;height:270px;width:100%}
+
+.table-container{
+  overflow-x:auto;
+  border-radius:22px;
+  border:1px solid var(--line);
+  background:var(--card);
+}
+.data-table{width:100%;border-collapse:collapse;min-width:600px}
+.data-table th{
+  text-align:left;
+  padding:15px 20px;
+  font-family:"JetBrains Mono",monospace;
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--silver);
+  background:rgba(255,255,255,.04);
+  border-bottom:1px solid var(--line);
+}
+.data-table td{
+  padding:14px 20px;
+  border-bottom:1px solid var(--line);
+  font-size:14.5px;
+  color:var(--muted);
+}
+.data-table td strong{color:var(--ink)}
+.data-table tbody tr:hover{background:rgba(255,255,255,.03)}
+.data-table tbody tr:last-child{border-bottom:none}
+.badge-mono{
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:500;
+  background:rgba(255,255,255,.08);
+  border:1px solid var(--line2);
+  color:#fff;
+}
+
+/* Pop-Up / Detail Modal */
+.modal-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:80;
+  background:rgba(0,0,0,.78);
+  backdrop-filter:blur(10px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  opacity:0;
+  transition:opacity .25s ease;
+}
+.modal-backdrop.open{display:flex;opacity:1}
+.modal-dialog{
+  width:min(680px,100%);
+  max-height:86vh;
+  overflow-y:auto;
+  background:#0c0c0e;
+  border:1px solid var(--line2);
+  border-radius:24px;
+  padding:30px;
+  box-shadow:0 30px 90px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.12);
+  transform:translateY(16px) scale(.98);
+  transition:transform .3s cubic-bezier(.16,1,.3,1);
+}
+.modal-backdrop.open .modal-dialog{transform:none}
+.modal-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+.modal-kicker{font-family:"JetBrains Mono",monospace;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:block}
+.modal-title{font-size:26px;color:#fff}
+.modal-close{
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  border:1px solid var(--line2);
+  background:rgba(255,255,255,.06);
+  color:#fff;
+  font-size:18px;
+  cursor:pointer;
+  flex-shrink:0;
+  transition:.2s;
+}
+.modal-close:hover{background:#fff;color:#050505}
+.modal-body p{color:var(--muted);font-size:15px;line-height:1.7;margin-bottom:14px}
+.modal-code{
+  margin-top:14px;
+  padding:16px;
+  border-radius:14px;
+  background:#050506;
+  border:1px solid var(--line);
+  font-family:"JetBrains Mono",monospace;
+  font-size:12.5px;
+  line-height:1.65;
+  color:var(--silver);
+  overflow-x:auto;
+  white-space:pre-wrap;
+}
+
+/* CTA & Footer */
+.cta-box{
+  position:relative;
+  overflow:hidden;
+  background:radial-gradient(60% 120% at 80% 0,rgba(255,255,255,.12),transparent 70%),var(--card);
+  border:1px solid var(--line2);
+  border-radius:28px;
+  padding:44px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:25px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.1);
+}
+.cta-box h2{
+  font-size:32px;
+  letter-spacing:-.035em;
+  margin-bottom:8px;
+  background:var(--fade);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+.cta-box p{color:var(--muted);max-width:580px}
+
+footer{padding:35px 0 0;color:var(--muted);font-size:13px;border-top:1px solid var(--line);overflow:hidden}
+.footer-row{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.footer-links{display:flex;gap:20px;font-weight:500}
+.footer-links a:hover{color:#fff}
+.mark{
+  font:700 clamp(70px,17vw,230px)/.85 "Inter Tight";
+  letter-spacing:-.06em;
+  text-align:center;
+  margin-top:34px;
+  height:.62em;
+  overflow:hidden;
+  white-space:nowrap;
+  background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0) 85%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  user-select:none;
+}
+
+/* Motion Reveals */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
+.reveal.visible{opacity:1;transform:none}
+.delay-1{transition-delay:.1s}.delay-2{transition-delay:.2s}.delay-3{transition-delay:.3s}
+
+@media(prefers-reduced-motion:reduce){
+  *{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}
+  .reveal{opacity:1;transform:none}
+}
+@media(max-width:1024px){
+  .hero-split{grid-template-columns:1fr;gap:32px}
+  .square-stage{height:340px;max-width:540px;margin:0 auto;width:100%}
+}
+@media(max-width:900px){
+  .kpi-grid,.grid-3,.pipeline-4{grid-template-columns:1fr 1fr}
+  .pipe-step-card:not(:last-child)::after{display:none}
+  .grid-2,.charts-grid{grid-template-columns:1fr}
+  .cta-box{flex-direction:column;align-items:flex-start;padding:30px}
+}
+@media(max-width:620px){
+  .wrap{width:calc(100% - 32px)}
+  nav{padding-left:18px}
+  nav ul{display:none}
+  .hero{padding:44px 0 40px}
+  .square-stage{height:auto;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .sq-frame,.sq-frame-inner{display:none}
+  .float-tile{position:static;width:100%;animation:none}
+  .ft-center{grid-column:span 2}
+  .kpi-grid,.grid-3,.pipeline-4{grid-template-columns:1fr}
+  section{padding:64px 0}
+  .footer-row{display:block}
+  .footer-links{margin-top:13px}
+  #top-btn{right:14px;bottom:14px}
+}
+</style>
+</head>
+<body>
+
+<div id="bar"></div>
+<button id="top-btn" aria-label="Back to top">↑</button>
+
+<header>
+  <div class="wrap">
+    <nav aria-label="Main navigation">
+      <a class="brand" href="index.html#top">Pinto<span>.</span></a>
+      <ul>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#workflow">Workflow</a></li>
+        <li><a href="#modules">Modules</a></li>
+        <li><a href="#analytics">Analytics</a></li>
+      </ul>
+      <a class="nav-cta" href="Project.html">← Projects</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- HERO -->
+  <div class="hero wrap" id="overview">
+    <div class="hero-split">
+      <div class="reveal">
+        <div class="pill"><span class="pill-square"></span> Retail Analytics &amp; Sales Intelligence · Case Study</div>
+        <h1>First Mart<br><span class="gradient">Retail Analytics Dashboard.</span></h1>
+        <p class="hero-lead">End-to-end retail performance and sales analytics built to track revenue, profit margins, regional demand, category mix, and repeat customer behavior across multi-year transaction records.</p>
+
+        <div class="actions">
+          <button class="btn btn-primary" type="button" onclick="openModuleModal('architecture')">Inspect Architecture Pop-Up ↗</button>
+          <a class="btn btn-ghost" href="https://github.com/datajutsu-jpl/Retail-Analytics-Dashboard" target="_blank" rel="noopener">GitHub Repository ↗</a>
+        </div>
+
+        <div class="tech-stack">
+          <span class="tech-chip">📊 Power BI / BI Reporting</span>
+          <span class="tech-chip">📐 Star Schema Modelling</span>
+          <span class="tech-chip">🗄️ SQL Aggregations</span>
+          <span class="tech-chip">⚡ DAX Time Intelligence</span>
+          <span class="tech-chip">🧹 Data Cleaning &amp; QA</span>
+        </div>
+      </div>
+
+      <!-- Square Floating Telemetry Tiles -->
+      <div class="square-stage reveal delay-2" id="squareStage">
+        <div class="sq-frame"></div>
+        <div class="sq-frame-inner"></div>
+
+        <div class="float-tile ft-tl" data-depth="0.04">
+          <span class="ft-kicker">REVENUE &amp; MARGIN</span>
+          <div class="ft-title">Profitability Tracking</div>
+          <div class="ft-sub">Gross sales, discounts &amp; net margin</div>
+        </div>
+
+        <div class="float-tile ft-tr" data-depth="-0.03">
+          <span class="ft-kicker">GEOGRAPHY</span>
+          <div class="ft-title">Regional Breakdown</div>
+          <div class="ft-sub">Store, region &amp; channel drill-downs</div>
+        </div>
+
+        <div class="float-tile ft-center" data-depth="0.02">
+          <span class="ft-kicker">DECISION LAYER</span>
+          <div class="ft-title">Executive &amp; Ops Views</div>
+          <div class="ft-sub">KPI cards · YoY trends · Category &amp; SKU mix</div>
+        </div>
+
+        <div class="float-tile ft-bl" data-depth="-0.04">
+          <span class="ft-kicker">ASSORTMENT</span>
+          <div class="ft-title">Category &amp; Product</div>
+          <div class="ft-sub">Top movers, Pareto share &amp; returns</div>
+        </div>
+
+        <div class="float-tile ft-br" data-depth="0.03">
+          <span class="ft-kicker">COHORTS</span>
+          <div class="ft-title">Customer Retention</div>
+          <div class="ft-sub">Order frequency &amp; segment value</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card reveal">
+        <span class="kpi-value counter" data-target="4">0</span>
+        <span class="kpi-label">Core Analytical Domains</span>
+      </div>
+      <div class="kpi-card reveal delay-1">
+        <span class="kpi-value counter" data-target="12">0</span>
+        <span class="kpi-label">Key KPIs &amp; Ratios Tracked</span>
+      </div>
+      <div class="kpi-card reveal delay-2">
+        <span class="kpi-value counter" data-target="100">0</span>
+        <span class="kpi-label">% Reconciled Rollups</span>
+      </div>
+      <div class="kpi-card reveal delay-3">
+        <span class="kpi-value counter" data-target="3">0</span>
+        <span class="kpi-label">Interactive Drill-Down Levels</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- WORKFLOW -->
+  <section id="workflow">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="pill">01 · Pipeline &amp; Modelling Flow</div>
+        <h2>From raw retail logs to decision-ready views</h2>
+        <p>Structured into four clean stages so business users can filter by period, region, and product category without slow ad-hoc queries.</p>
+      </div>
+
+      <div class="architecture-box reveal">
+        <div class="pipeline-4">
+          <div class="pipe-step-card">
+            <span class="pipe-tag">01 · INGEST</span>
+            <b>Raw Retail Extracts</b>
+            <span>Orders, line items, product catalog, customer &amp; calendar tables.</span>
+          </div>
+          <div class="pipe-step-card">
+            <span class="pipe-tag">02 · CLEANSE</span>
+            <b>Standardization &amp; QA</b>
+            <span>Null handling, date alignment, currency/discount normalization, deduplication.</span>
+          </div>
+          <div class="pipe-step-card">
+            <span class="pipe-tag">03 · MODEL</span>
+            <b>Star Schema &amp; Measures</b>
+            <span>Fact sales linked to conformed Date, Product, Customer, and Region dimensions.</span>
+          </div>
+          <div class="pipe-step-card">
+            <span class="pipe-tag">04 · VISUALIZE</span>
+            <b>Interactive Dashboard</b>
+            <span>Executive KPIs, trend lines, category comparisons, and cross-filtering.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTERACTIVE POP-UP MODULES -->
+  <section id="modules">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="pill">02 · Deep-Dive Pop-Up Cards</div>
+        <h2>Click any card to open a detailed brief</h2>
+        <p>Each module opens a pop-up panel with engineering notes, business questions answered, and sample logic.</p>
+      </div>
+
+      <div class="grid-3">
+        <article class="card card-interactive reveal" onclick="openModuleModal('sales')">
+          <h3><span>Revenue &amp; Margin</span><span class="popup-badge">Pop-up ↗</span></h3>
+          <p>Tracks gross sales, net revenue, discount impact, and profit margins across time periods.</p>
+          <ul class="styled-list">
+            <li>Month-over-month and year-over-year pacing</li>
+            <li>High-revenue vs. high-margin product check</li>
+          </ul>
+        </article>
+
+        <article class="card card-interactive reveal delay-1" onclick="openModuleModal('merchandising')">
+          <h3><span>Category &amp; SKU Mix</span><span class="popup-badge">Pop-up ↗</span></h3>
+          <p>Highlights top-performing categories, sub-categories, and concentration risk across SKUs.</p>
+          <ul class="styled-list">
+            <li>Contribution share by department</li>
+            <li>Long-tail vs. core volume drivers</li>
+          </ul>
+        </article>
+
+        <article class="card card-interactive reveal delay-2" onclick="openModuleModal('customers')">
+          <h3><span>Regional &amp; Customer</span><span class="popup-badge">Pop-up ↗</span></h3>
+          <p>Compares regional performance and separates one-time buyers from repeat customers.</p>
+          <ul class="styled-list">
+            <li>Region &amp; segment revenue distribution</li>
+            <li>Average order value &amp; repeat cadence</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ANALYTICS & METRICS TABLE -->
+  <section id="analytics">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="pill">03 · Visual Breakdown &amp; KPI Matrix</div>
+        <h2>Sample telemetry &amp; reporting structure</h2>
+        <p>Replace placeholder chart figures with your exact export numbers from <code>Retail-Analytics-Dashboard</code> whenever you sync final metrics.</p>
+      </div>
+
+      <div class="charts-grid reveal">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>Quarterly Revenue &amp; Profit Trend</h3>
+            <p>Comparative quarterly trajectory across the retail reporting window</p>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="revChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>Revenue Share by Category</h3>
+            <p>Assortment contribution across core retail departments</p>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="catChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-container reveal">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Dashboard View</th>
+              <th>Primary Metrics</th>
+              <th>Dimensions / Filters</th>
+              <th>Business Question Answered</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Executive Overview</strong></td>
+              <td>Total Sales, Profit, Margin %, Orders</td>
+              <td>Year, Quarter, Month, Region</td>
+              <td>Is overall retail performance growing profitably?</td>
+            </tr>
+            <tr>
+              <td><strong>Product &amp; Category</strong></td>
+              <td>Category Sales, Profit Contribution, AOV</td>
+              <td>Category, Sub-Category, Product</td>
+              <td>Which items drive volume versus net profit?</td>
+            </tr>
+            <tr>
+              <td><strong>Regional &amp; Channel</strong></td>
+              <td>Regional Revenue, Growth %, Discount Rate</td>
+              <td>Region, State/City, Segment</td>
+              <td>Where are growth pockets and margin leaks concentrated?</td>
+            </tr>
+            <tr>
+              <td><strong>Customer Behavior</strong></td>
+              <td>Customer Count, Repeat Rate, Sales / Customer</td>
+              <td>Customer Segment, Tenure, Order Band</td>
+              <td>How much revenue comes from repeat loyalty?</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section>
+    <div class="wrap">
+      <div class="cta-box reveal">
+        <div>
+          <div class="pill">Project Source</div>
+          <h2>Inspect the Retail Analytics repository</h2>
+          <p>Browse the project files, data model notes, and dashboard documentation on GitHub.</p>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <a class="btn btn-primary" href="https://github.com/datajutsu-jpl/Retail-Analytics-Dashboard" target="_blank" rel="noopener">Open on GitHub ↗</a>
+          <a class="btn btn-ghost" href="get_in_touch.html">Let's connect ↗</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- POP-UP DETAIL MODAL -->
+<div class="modal-backdrop" id="detailModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-dialog">
+    <div class="modal-top">
+      <div>
+        <span class="modal-kicker" id="modalKicker">MODULE BRIEF</span>
+        <h3 class="modal-title" id="modalTitle">Details</h3>
+      </div>
+      <button class="modal-close" type="button" id="modalClose" aria-label="Close pop-up">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap footer-row">
+    <span>© 2026 Pinto Leonard · Retail Analytics Dashboard Case Study</span>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="Project.html">All Projects</a>
+      <a href="https://github.com/datajutsu-jpl/Retail-Analytics-Dashboard" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+  <div class="mark" aria-hidden="true">Pinto Leonard</div>
+</footer>
+
+<script>
+// Scroll progress & back-to-top
+const bar = document.getElementById('bar'), tb = document.getElementById('top-btn');
+window.addEventListener('scroll', () => {
+  bar.style.transform = `scaleX(${scrollY / (document.documentElement.scrollHeight - innerHeight || 1)})`;
+  tb.classList.toggle('show', scrollY > 600);
+}, { passive: true });
+tb.onclick = () => scrollTo({ top: 0 });
+
+// Active nav state
+const navLinks = [...document.querySelectorAll('nav ul a')];
+const so = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+  });
+}, { rootMargin: '-45% 0px -50% 0px' });
+document.querySelectorAll('section[id], #overview[id]').forEach(s => so.observe(s));
+
+// Parallax on square hero tiles
+const stage = document.getElementById('squareStage');
+if (stage && window.matchMedia('(min-width: 621px)').matches) {
+  stage.addEventListener('mousemove', e => {
+    const r = stage.getBoundingClientRect();
+    const x = e.clientX - r.left - r.width / 2;
+    const y = e.clientY - r.top - r.height / 2;
+    stage.querySelectorAll('.float-tile').forEach(tile => {
+      const d = parseFloat(tile.dataset.depth || 0.03);
+      tile.style.marginLeft = `${x * d}px`;
+      tile.style.marginTop = `${y * d}px`;
+    });
+  });
+  stage.addEventListener('mouseleave', () => {
+    stage.querySelectorAll('.float-tile').forEach(tile => {
+      tile.style.marginLeft = '0px';
+      tile.style.marginTop = '0px';
+    });
+  });
+}
+
+// Reveal & counters
+const runCounter = el => {
+  const target = +el.dataset.target, dur = 1300, t0 = performance.now();
+  const step = now => {
+    const p = Math.min((now - t0) / dur, 1);
+    const eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.floor(eased * target).toLocaleString();
+    if (p < 1) requestAnimationFrame(step);
+    else el.textContent = target.toLocaleString();
+  };
+  requestAnimationFrame(step);
+};
+
+const io = new IntersectionObserver((entries, obs) => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add('visible');
+    const c = e.target.querySelector('.counter');
+    if (c && !c.dataset.done) { c.dataset.done = '1'; runCounter(c); }
+    obs.unobserve(e.target);
+  });
+}, { threshold: 0.14 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+// Pop-up Modal Logic
+const modalData = {
+  architecture: {
+    kicker: 'ARCHITECTURE BRIEF',
+    title: 'Retail Analytics Data & Reporting Flow',
+    html: `
+      <p>Designed around a clean separation between raw transactional tables, standardized dimensions, and KPI measures so filter interactions stay responsive across slicers.</p>
+      <ul class="styled-list">
+        <li><strong>Fact Grain:</strong> Order line or transaction grain with foreign keys to Date, Product, Customer, and Region.</li>
+        <li><strong>Time Intelligence:</strong> Calendar dimension enabling period-over-period comparisons without ambiguous date parsing.</li>
+        <li><strong>Zero-Division Guards:</strong> Safe division handling for profit margin (%) and discount impact metrics.</li>
+      </ul>
+      <div class="modal-code">-- Example KPI Pattern (Safe Margin Ratio)
+Profit_Margin_Pct = DIVIDE(SUM(FactSales[Profit]), SUM(FactSales[Sales]), 0)</div>
+    `
+  },
+  sales: {
+    kicker: 'MODULE 01 · PROFITABILITY',
+    title: 'Revenue, Discount & Margin Tracking',
+    html: `
+      <p>Pairs top-line sales growth with bottom-line profit margin so heavy discounting doesn't mask eroding unit economics.</p>
+      <ul class="styled-list">
+        <li>Tracks gross/net sales alongside total profit and margin percentage.</li>
+        <li>Flags periods or segments where revenue climbs while margin compresses.</li>
+      </ul>
+      <div class="modal-code">-- Sample SQL Rollup Check
+SELECT region, SUM(sales) AS total_sales, SUM(profit) AS total_profit
+FROM fact_retail_sales
+GROUP BY region
+ORDER BY total_sales DESC;</div>
+    `
+  },
+  merchandising: {
+    kicker: 'MODULE 02 · ASSORTMENT',
+    title: 'Category & Product Performance',
+    html: `
+      <p>Evaluates how categories and individual products contribute to overall store turnover and profitability.</p>
+      <ul class="styled-list">
+        <li>Ranks categories and sub-categories by revenue and profit share.</li>
+        <li>Helps distinguish traffic-driving items from high-margin core lines.</li>
+      </ul>
+    `
+  },
+  customers: {
+    kicker: 'MODULE 03 · GEOGRAPHY & LOYALTY',
+    title: 'Regional & Customer Segmentation',
+    html: `
+      <p>Connects geographic performance with customer buying patterns to guide targeted promotions and retention focus.</p>
+      <ul class="styled-list">
+        <li>Compares regional totals and average order value across customer segments.</li>
+        <li>Highlights repeat order contribution across active accounts.</li>
+      </ul>
+    `
+  }
+};
+
+const modal = document.getElementById('detailModal');
+const modalClose = document.getElementById('modalClose');
+
+function openModuleModal(key) {
+  const item = modalData[key];
+  if (!item) return;
+  document.getElementById('modalKicker').textContent = item.kicker;
+  document.getElementById('modalTitle').textContent = item.title;
+  document.getElementById('modalBody').innerHTML = item.html;
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModuleModal() {
+  modal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+modalClose.onclick = closeModuleModal;
+modal.addEventListener('click', e => { if (e.target === modal) closeModuleModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.classList.contains('open')) closeModuleModal(); });
+
+// Monochrome Chart.js Setup
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof Chart === 'undefined') return;
+  Chart.defaults.color = '#8b8b93';
+  Chart.defaults.font.family = "'Inter', sans-serif";
+
+  new Chart(document.getElementById('revChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+      datasets: [
+        {
+          label: 'Sales (Sample)',
+          data: [180, 225, 210, 285],
+          backgroundColor: 'rgba(255,255,255,.85)',
+          borderRadius: 6
+        },
+        {
+          label: 'Profit (Sample)',
+          data: [42, 56, 51, 74],
+          backgroundColor: 'rgba(161,161,170,.45)',
+          borderRadius: 6
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: '#d4d4d8', boxWidth: 12 } },
+        tooltip: { backgroundColor: '#0c0c0d', borderColor: 'rgba(255,255,255,.2)', borderWidth: 1 }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#d4d4d8' } },
+        y: { grid: { color: 'rgba(255,255,255,.06)' }, ticks: { color: '#8b8b93' } }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('catChart').getContext('2d'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Apparel & Goods', 'Home & Living', 'Electronics', 'Essentials'],
+      datasets: [{
+        data: [38, 27, 20, 15],
+        backgroundColor: ['#ffffff', '#a1a1aa', '#71717a', '#3f3f46'],
+        borderColor: '#0b0b0c',
+        borderWidth: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '64%',
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: { color: '#d4d4d8', usePointStyle: true, pointStyle: 'rectRounded', padding: 14 }
+        },
+        tooltip: { backgroundColor: '#0c0c0d', borderColor: 'rgba(255,255,255,.2)', borderWidth: 1 }
+      }
+    }
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,847 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script src="pinto-intro.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cycling & Health Impact | Case Study</title>
+    <style>
+      :root {
+        --bg: #050505;
+        --panel: #0b0b0c;
+        --panel2: #101012;
+        --line: rgba(255, 255, 255, 0.09);
+        --text: #f4f4f5;
+        --muted: #8b8b93;
+        --silver: #d4d4d8;
+        --accent: #dfe5e9;
+        --green: #b5c8b8;
+        --radius: 14px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          sans-serif;
+        line-height: 1.55;
+        overflow-x: hidden;
+      }
+      body:before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.022) 1px, transparent 1px),
+          linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.022) 1px,
+            transparent 1px
+          );
+        background-size: 64px 64px;
+        z-index: -1;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      .wrap {
+        width: min(1180px, calc(100% - 44px));
+        margin: auto;
+      }
+      .topbar {
+        position: sticky;
+        top: 12px;
+        z-index: 30;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        min-height: 58px;
+        margin-top: 12px;
+        padding: 0 9px 0 24px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgba(14, 14, 15, 0.72);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        font-size: 12px;
+        letter-spacing: 0.11em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .brand {
+        font-weight: 750;
+        color: #f5f6f7;
+        letter-spacing: 0.18em;
+      }
+      .topbar nav {
+        display: flex;
+        gap: 22px;
+      }
+      .topbar nav a {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--muted);
+        transition: color 0.2s;
+      }
+      .topbar nav a:hover {
+        color: white;
+      }
+      .topbar > span {
+        font-size: 14px;
+        font-weight: 600;
+        color: #050505;
+        background: #fff;
+        padding: 10px 18px;
+        border-radius: 999px;
+        white-space: nowrap;
+      }
+      .eyebrow {
+        font-size: 11px;
+        letter-spacing: 0.19em;
+        text-transform: uppercase;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .eyebrow:before {
+        content: "";
+        height: 1px;
+        width: 28px;
+        background: #aeb5bb;
+      }
+      .hero {
+        min-height: 600px;
+        padding: 82px 0 64px;
+        display: grid;
+        grid-template-columns: 1.02fr 0.98fr;
+        gap: 42px;
+        align-items: center;
+      }
+      .hero h1 {
+        font-size: clamp(46px, 6.3vw, 88px);
+        letter-spacing: -0.075em;
+        line-height: 0.98;
+        font-weight: 650;
+        margin: 22px 0 25px;
+      }
+      .hero h1 span {
+        color: #8d969d;
+      }
+      .lead {
+        max-width: 610px;
+        font-size: 17px;
+        color: #b8bec3;
+        line-height: 1.75;
+      }
+      .meta {
+        display: flex;
+        gap: 26px;
+        flex-wrap: wrap;
+        margin-top: 32px;
+      }
+      .meta div {
+        border-left: 1px solid #3a4045;
+        padding-left: 12px;
+      }
+      .meta small {
+        display: block;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 10px;
+      }
+      .meta strong {
+        font-size: 13px;
+        font-weight: 550;
+        color: #dfe3e6;
+      }
+      .motion-stage {
+        position: relative;
+        height: 360px;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background: linear-gradient(180deg, #0b0e10, #060708);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .stage-label {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        font-size: 10px;
+        letter-spacing: 0.17em;
+        text-transform: uppercase;
+        color: #747c82;
+      }
+      .stage-sun {
+        position: absolute;
+        width: 190px;
+        height: 190px;
+        border: 1px solid rgba(210, 218, 224, 0.09);
+        border-radius: 50%;
+        top: 68px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      .stage-sun:before,
+      .stage-sun:after {
+        content: "";
+        position: absolute;
+        border: 1px solid rgba(210, 218, 224, 0.07);
+        border-radius: 50%;
+        inset: 25px;
+      }
+      .stage-sun:after {
+        inset: 50px;
+      }
+      .route {
+        position: absolute;
+        bottom: 74px;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #444b50;
+      }
+      .route:after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        border-top: 1px dashed #707980;
+        opacity: 0.5;
+      }
+      .bike {
+        position: absolute;
+        width: 270px;
+        height: 180px;
+        bottom: 65px;
+        animation: cruise 7s ease-in-out infinite alternate;
+        filter: drop-shadow(0 12px 16px rgba(0, 0, 0, 0.55));
+      }
+      .wheel {
+        transform-origin: center;
+        animation: spin 1.1s linear infinite;
+      }
+      .bike svg {
+        width: 100%;
+        height: 100%;
+      }
+      .floating-data {
+        position: absolute;
+        right: 18px;
+        bottom: 18px;
+        border: 1px solid #252b30;
+        background: rgba(8, 10, 12, 0.82);
+        border-radius: 12px;
+        padding: 12px 14px;
+        backdrop-filter: blur(8px);
+      }
+      .floating-data span {
+        display: block;
+        color: var(--muted);
+        font-size: 9px;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+      }
+      .floating-data strong {
+        font-size: 22px;
+        letter-spacing: -0.04em;
+      }
+      .motion-caption {
+        position: absolute;
+        left: 20px;
+        bottom: 19px;
+        font-size: 10px;
+        color: #858e95;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes cruise {
+        0% {
+          transform: translateX(-18px) translateY(0);
+        }
+        45% {
+          transform: translateX(12px) translateY(-3px);
+        }
+        100% {
+          transform: translateX(20px) translateY(0);
+        }
+      }
+      .section {
+        padding: 58px 0;
+        border-top: 1px solid var(--line);
+      }
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 30px;
+        align-items: end;
+        margin-bottom: 30px;
+      }
+      .section-head h2 {
+        font-size: clamp(26px, 3vw, 40px);
+        letter-spacing: -0.055em;
+        margin: 10px 0 0;
+      }
+      .section-head p {
+        max-width: 450px;
+        color: var(--muted);
+        font-size: 14px;
+        margin: 0;
+      }
+      .kpis {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+      .kpi {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 22px;
+        min-height: 130px;
+      }
+      .kpi .num {
+        font-size: clamp(28px, 4vw, 46px);
+        letter-spacing: -0.065em;
+        font-weight: 650;
+      }
+      .kpi p {
+        color: var(--muted);
+        font-size: 12px;
+        margin: 4px 0 0;
+      }
+      .insights {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+      .insight {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 23px;
+        background: var(--panel);
+        display: flex;
+        gap: 18px;
+      }
+      .insight .index {
+        color: #69737a;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+      }
+      .insight h3 {
+        margin: 0 0 8px;
+        font-size: 17px;
+        letter-spacing: -0.025em;
+      }
+      .insight p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .insight:hover {
+        border-color: #4b5359;
+        transform: translateY(-2px);
+        transition: 0.25s;
+      }
+      .process {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+      .step {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 22px;
+        background: #090b0d;
+        min-height: 170px;
+      }
+      .step b {
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        color: #8e979e;
+      }
+      .step h3 {
+        margin: 14px 0 8px;
+        font-size: 16px;
+      }
+      .step p {
+        font-size: 12px;
+        color: var(--muted);
+        margin: 0;
+      }
+      .feature-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .feature {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 22px;
+      }
+      .feature h3 {
+        font-size: 15px;
+        margin: 0 0 14px;
+      }
+      .feature ul {
+        padding-left: 18px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .feature li {
+        margin: 7px 0;
+      }
+      .conclusion {
+        border: 1px solid #31373c;
+        border-radius: 18px;
+        padding: 30px;
+        background: #0b0e10;
+      }
+      .conclusion p {
+        font-size: 16px;
+        color: #c1c7cb;
+        max-width: 850px;
+        margin: 12px 0 0;
+      }
+      .footer {
+        padding: 35px 0 0;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+        font-size: 13px;
+        letter-spacing: 0.02em;
+        text-transform: none;
+      }
+      .footer-links {
+        display: flex;
+        gap: 20px;
+        font-weight: 500;
+      }
+      .footer-links a:hover {
+        color: #fff;
+      }
+      .footer-mark {
+        font:
+          700 clamp(70px, 17vw, 230px)/0.85 "Inter Tight",
+          sans-serif;
+        letter-spacing: -0.06em;
+        text-align: center;
+        margin-top: 34px;
+        height: 0.62em;
+        overflow: hidden;
+        white-space: nowrap;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.55),
+          rgba(255, 255, 255, 0) 85%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        user-select: none;
+      }
+      .reveal {
+        opacity: 0;
+        transform: translateY(18px);
+        transition:
+          opacity 0.7s ease,
+          transform 0.7s ease;
+      }
+      .reveal.visible {
+        opacity: 1;
+        transform: none;
+      }
+      @media (max-width: 850px) {
+        .hero {
+          grid-template-columns: 1fr;
+          padding-top: 55px;
+          gap: 28px;
+        }
+        .motion-stage {
+          height: 310px;
+        }
+        .kpis {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .process {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .section-head {
+          align-items: start;
+          flex-direction: column;
+        }
+        .topbar nav {
+          gap: 13px;
+        }
+      }
+      @media (max-width: 560px) {
+        .topbar nav {
+          display: none;
+        }
+        .topbar {
+          padding-left: 18px;
+        }
+        .topbar > span {
+          font-size: 11px;
+          padding: 9px 12px;
+        }
+        .hero h1 {
+          font-size: 52px;
+        }
+        .motion-stage {
+          height: 270px;
+        }
+        .bike {
+          width: 220px;
+        }
+        .insights,
+        .feature-grid {
+          grid-template-columns: 1fr;
+        }
+        .process {
+          grid-template-columns: 1fr 1fr;
+        }
+        .kpi {
+          padding: 17px;
+          min-height: 110px;
+        }
+        .footer {
+          gap: 10px;
+          flex-direction: column;
+        }
+        .footer-mark {
+          margin-top: 25px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
+          scroll-behavior: auto !important;
+        }
+        .reveal {
+          opacity: 1;
+          transform: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="wrap topbar">
+      <a class="brand" href="index.html">Pinto.</a>
+      <nav>
+        <a href="#insights">Insights</a><a href="#method">Method</a
+        ><a href="#dashboard">Dashboard</a>
+      </nav>
+      <span><a href="Project.html" >All Projects ↗</a></span>
+    </header>
+    <main id="top" class="wrap">
+      <section class="hero">
+        <div class="reveal visible">
+          <div class="eyebrow">Portfolio case study · 01</div>
+          <h1>Cycling.<br /><span>Health impact.</span></h1>
+          <p class="lead">
+            Exploring how consistent bicycle riding connects to BMI transitions,
+            chronic condition reversal, and rider engagement—across age groups,
+            genders, and cities.
+          </p>
+          <div class="meta">
+            <div><small>Toolkit</small><strong>Excel 2010</strong></div>
+            <div><small>Focus</small><strong>Health KPI analysis</strong></div>
+            <div><small>Approach</small><strong>Manual data prep</strong></div>
+          </div>
+        </div>
+        <div class="motion-stage reveal visible">
+          <div class="stage-label">Ride / repeat / improve</div>
+          <div class="stage-sun"></div>
+          <div class="route"></div>
+          <div class="bike" aria-label="Animated bicycle illustration">
+            <svg
+              viewBox="0 0 300 190"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <g class="wheel" stroke="#c9d0d5" stroke-width="3.3">
+                <circle cx="63" cy="131" r="47" />
+                <circle cx="237" cy="131" r="47" />
+                <circle cx="63" cy="131" r="3" fill="#c9d0d5" />
+                <circle cx="237" cy="131" r="3" fill="#c9d0d5" />
+                <path
+                  d="M63 84V178M16 131H110M237 84V178M190 131H284"
+                  stroke="#717b83"
+                  stroke-width="1"
+                  opacity=".6"
+                />
+              </g>
+              <g
+                stroke="#e0e5e8"
+                stroke-width="4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M63 131L112 83L154 131L63 131L112 83L237 131L154 131L177 80"
+                />
+                <path
+                  d="M102 78H124M171 76H187M154 131L163 145"
+                  stroke="#909ba3"
+                />
+              </g>
+              <g fill="#dfe5e9">
+                <circle cx="177" cy="59" r="11" />
+                <path
+                  d="M173 72L153 94L181 109L202 91L237 131L226 138L195 103L180 115L151 131L140 121L160 92L165 74Z"
+                />
+              </g>
+              <g stroke="#e0e5e8" stroke-width="4" stroke-linecap="round">
+                <path d="M177 72L197 90L211 72M168 79L151 95" />
+                <path
+                  d="M154 131L134 149L115 143M181 109L194 133L215 140"
+                  stroke="#aeb8bf"
+                />
+              </g>
+              <g stroke="#8f9aa2" stroke-width="3" stroke-linecap="round">
+                <path d="M107 78L97 72M177 78L188 74" />
+              </g>
+            </svg>
+          </div>
+          <div class="motion-caption">Movement as a metric</div>
+          <div class="floating-data">
+            <span>Participants with BMI improvement</span><strong>~50%</strong>
+          </div>
+        </div>
+      </section>
+      <section id="insights" class="section reveal">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Key signals</div>
+            <h2>What the data surfaced</h2>
+          </div>
+          <p>
+            Headline findings from the analysis, highlighting improvement
+            patterns and areas that deserve a closer look.
+          </p>
+        </div>
+        <div class="kpis">
+          <div class="kpi">
+            <div class="num">~5,000</div>
+            <p>Participants with chronic condition reversal</p>
+          </div>
+          <div class="kpi">
+            <div class="num">~50%</div>
+            <p>Moved to a healthier BMI category</p>
+          </div>
+          <div class="kpi">
+            <div class="num">26–35</div>
+            <p>Age group with strongest improvement</p>
+          </div>
+          <div class="kpi">
+            <div class="num">2020</div>
+            <p>Peak in new cyclist enrollment</p>
+          </div>
+        </div>
+      </section>
+      <section class="section reveal">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Analytical highlights</div>
+            <h2>Patterns worth paying attention to</h2>
+          </div>
+        </div>
+        <div class="insights">
+          <article class="insight">
+            <div class="index">01</div>
+            <div>
+              <h3>Hypertension & diabetes led</h3>
+              <p>
+                These were the most common health issues reported before
+                participants began regular cycling.
+              </p>
+            </div>
+          </article>
+          <article class="insight">
+            <div class="index">02</div>
+            <div>
+              <h3>BMI improvements varied by gender</h3>
+              <p>
+                Female participants showed a slightly higher rate of BMI
+                improvement than male participants.
+              </p>
+            </div>
+          </article>
+          <article class="insight">
+            <div class="index">03</div>
+            <div>
+              <h3>Asthma cases rose post-cycling</h3>
+              <p>
+                An unexpected increase emerged after cycling—an anomaly to
+                investigate alongside environmental or seasonal context.
+              </p>
+            </div>
+          </article>
+          <article class="insight">
+            <div class="index">04</div>
+            <div>
+              <h3>Enrollment spiked in 2020</h3>
+              <p>
+                New cyclist enrollment remained fairly steady over time, with a
+                notable 2020 surge.
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+      <section id="method" class="section reveal">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Data preparation</div>
+            <h2>From raw fields to usable signals</h2>
+          </div>
+          <p>
+            Manual cleaning and derived metrics were used to prepare the data
+            for analysis in legacy Excel.
+          </p>
+        </div>
+        <div class="process">
+          <article class="step">
+            <b>01 / CLEAN</b>
+            <h3>Remove clutter</h3>
+            <p>
+              Drop irrelevant identifiers, survey notes, and unused metadata.
+            </p>
+          </article>
+          <article class="step">
+            <b>02 / IMPUTE</b>
+            <h3>Handle missing values</h3>
+            <p>
+              Estimate rides/week where possible; use Unknown or mode for
+              categories; remove critical-null rows.
+            </p>
+          </article>
+          <article class="step">
+            <b>03 / STANDARDIZE</b>
+            <h3>Consistent categories</h3>
+            <p>
+              Normalize gender and health issue labels and unify BMI groups.
+            </p>
+          </article>
+          <article class="step">
+            <b>04 / DERIVE</b>
+            <h3>Build analysis fields</h3>
+            <p>
+              Weekly ride time, BMI change, engagement tiers, and join year.
+            </p>
+          </article>
+        </div>
+      </section>
+      <section id="dashboard" class="section reveal">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Dashboard scope</div>
+            <h2>Designed for exploration</h2>
+          </div>
+          <p>
+            Interactive slicers and visuals help compare health changes,
+            engagement, and enrollment patterns.
+          </p>
+        </div>
+        <div class="feature-grid">
+          <div class="feature">
+            <h3>Health outcomes</h3>
+            <ul>
+              <li>BMI transitions before vs. after by gender</li>
+              <li>Chronic condition reversal counts</li>
+              <li>Health condition comparison pre/post riding</li>
+              <li>Participant improvement rate</li>
+            </ul>
+          </div>
+          <div class="feature">
+            <h3>Engagement & population</h3>
+            <ul>
+              <li>Average weekly ride time across cities</li>
+              <li>Engagement level distribution</li>
+              <li>New cyclist enrollment trend by year</li>
+              <li>Age-group improvement comparisons</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+      <section class="section reveal">
+        <div class="conclusion">
+          <div class="eyebrow">Takeaway</div>
+          <h2
+            style="
+              font-size: clamp(25px, 3vw, 40px);
+              letter-spacing: -0.06em;
+              margin: 8px 0 0;
+            "
+          >
+            A small habit. A measurable signal.
+          </h2>
+          <p>
+            The project highlights positive associations between regular cycling
+            and improvements in BMI and chronic conditions, with differences
+            across age and gender groups. The unusual increase in asthma cases
+            is a reminder to validate trends and consider context before drawing
+            conclusions.
+          </p>
+        </div>
+      </section>
+    </main>
+    <footer class="wrap footer">
+      <span>© 2026 Pinto Leonard · Cycling Health Impact Analysis</span>
+      <div class="footer-links">
+        
+        <a href="#top">Back to top ↑</a>
+      </div>
+    </footer>
+    <div class="wrap footer-mark" aria-hidden="true">Pinto Leonard</div>
+    <script>
+      // Gentle reveal motion; reduced-motion preference is respected in CSS.
+      const observer = new IntersectionObserver(
+        (entries) =>
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.classList.add("visible");
+              observer.unobserve(e.target);
+            }
+          }),
+        { threshold: 0.12 },
+      );
+      document
+        .querySelectorAll(".reveal:not(.visible)")
+        .forEach((el) => observer.observe(el));
+    </script>
+  </body>
+</html>
