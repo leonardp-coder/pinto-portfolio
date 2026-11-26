@@ -142,6 +142,47 @@ footer{padding:35px 0 0;color:var(--muted);font-size:13px;border-top:1px solid v
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-delay:0ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.reveal{opacity:1;transform:none}}
 @media(max-width:900px){.hero{grid-template-columns:1fr;gap:20px;padding-top:60px}.case-grid{grid-template-columns:1fr 1fr}.pipeline{grid-template-columns:1fr 1fr}.node:nth-child(2):after,.node:nth-child(2):before{display:none}.carousel-stage{height:570px}.showcase-card{width:min(430px,65vw)}.showcase-card.left{transform:translateX(-60%) translateZ(-100px) rotateY(28deg) scale(.78)}.showcase-card.right{transform:translateX(60%) translateZ(-100px) rotateY(-28deg) scale(.78)}}
 @media(max-width:620px){.wrap{width:calc(100% - 32px)}nav{padding-left:18px}nav ul{display:none}.hero{padding:44px 0 40px;min-height:auto}.hero-copy{font-size:16px}.flow{height:360px}.ring{display:none}.s1{width:140px;right:-6px}.s2{left:-6px}.tag-one{right:0}.tag-two{left:0}section{padding:64px 0}.case-grid,.pipeline{grid-template-columns:1fr}.pipeline{gap:30px}.node:not(:last-child):after,.node:not(:last-child):before{display:none}.architecture{padding:26px 20px}.contact{display:block;padding:28px}.contact .btn{margin-top:20px}.footer-row{display:block}.footer-links{margin-top:13px}.carousel-stage{height:560px}.showcase-card{width:calc(100% - 34px);height:515px}.showcase-card.left{transform:translateX(-92%) scale(.75) rotateY(24deg)}.showcase-card.right{transform:translateX(92%) scale(.75) rotateY(-24deg)}.showcase-art{height:225px}.showcase-copy{padding:20px}#top-btn{right:14px;bottom:14px}}
+
+/* extra project art */
+.radar-grid{fill:none;stroke:rgba(255,255,255,.2);stroke-width:1}.radar-axis{stroke:rgba(255,255,255,.14)}
+.radar-a{fill:rgba(255,255,255,.2);stroke:#fff;stroke-width:1.6;filter:drop-shadow(0 0 8px rgba(255,255,255,.5))}
+.radar-b{fill:rgba(255,255,255,.04);stroke:rgba(255,255,255,.5);stroke-width:1.2;stroke-dasharray:4 4}
+.radar-spin{transform-origin:100px 100px;animation:spin 40s linear infinite}
+.tidy{position:relative;display:grid;grid-template-columns:repeat(8,16px);gap:10px;padding:10px}
+.tidy i{width:16px;height:16px;border-radius:5px;background:linear-gradient(145deg,#fff,#6a6a72);animation:tidy 7s ease-in-out infinite;animation-delay:calc(var(--i)*55ms)}
+.scan{position:absolute;top:-6px;bottom:-6px;left:0;width:2px;background:linear-gradient(180deg,transparent,#fff,transparent);box-shadow:0 0 18px #fff;animation:scan 7s ease-in-out infinite}
+.donut-base{fill:none;stroke:rgba(255,255,255,.12);stroke-width:12}
+.donut{fill:none;stroke:#fff;stroke-width:12;stroke-linecap:round;stroke-dasharray:0 277;transform:rotate(-90deg);transform-origin:70px 70px;animation:donut 5s ease-in-out infinite;filter:drop-shadow(0 0 6px rgba(255,255,255,.6))}
+.area{fill:rgba(255,255,255,.14);opacity:0;animation:areaIn 5s ease-in-out infinite}
+.trend{fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 6px #fff);stroke-dasharray:1;stroke-dashoffset:1;animation:draw 4s ease-in-out infinite}
+.route-base{fill:none;stroke:rgba(255,255,255,.16);stroke-width:2;stroke-dasharray:3 6}
+.route{fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round;filter:drop-shadow(0 0 6px #fff);stroke-dasharray:1;stroke-dashoffset:1;animation:draw 5s linear infinite}
+.rider{fill:#fff;filter:drop-shadow(0 0 8px #fff)}
+.showcase-art svg{overflow:visible}
+@keyframes draw{0%{stroke-dashoffset:1}70%,100%{stroke-dashoffset:0}}
+@keyframes tidy{0%,15%{transform:translate(var(--dx),var(--dy)) rotate(var(--r));opacity:.45}50%,80%{transform:none;opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(var(--r));opacity:.45}}
+@keyframes scan{0%,12%{left:0;opacity:0}20%{opacity:1}50%{left:100%;opacity:1}58%,100%{left:100%;opacity:0}}
+@keyframes donut{0%{stroke-dasharray:0 277}60%,100%{stroke-dasharray:190 277}}
+@keyframes areaIn{0%,30%{opacity:0}70%,100%{opacity:1}}
+/* carousel scrolling + motion */
+.carousel-stage{touch-action:pan-y;cursor:grab;perspective-origin:calc(50% + (var(--sp,.5) - .5) * 30%) 50%;outline-offset:-6px}
+.carousel-stage:active{cursor:grabbing}
+.carousel-stage:before{transform:translateX(calc((var(--sp,.5) - .5) * 60%))}
+.showcase-card:before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:radial-gradient(380px circle at var(--mx,50%) var(--my,0%),rgba(255,255,255,.1),transparent 62%);opacity:0;transition:opacity .35s}
+.showcase-card.active:hover:before{opacity:1}
+.featured-carousel.pre .showcase-card{opacity:0;transform:translateY(70px) scale(.8);pointer-events:none}
+.carousel-dot.active{position:relative;overflow:hidden;background:#4a4a50}
+.carousel-dot.active:after{content:"";position:absolute;inset:0;background:#fff;transform-origin:left;animation:dotFill var(--dur,6500ms) linear forwards}
+.featured-carousel.paused .carousel-dot.active:after{animation-play-state:paused}
+@keyframes dotFill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.project-rail{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x proximity;padding:24px 4px 6px;margin-top:6px;scrollbar-width:none;justify-content:safe center;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+.project-rail::-webkit-scrollbar{display:none}
+.rail-item{flex:none;scroll-snap-align:center;display:flex;align-items:center;gap:9px;padding:10px 18px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.03);font:500 13.5px Inter,sans-serif;color:var(--muted);cursor:pointer;white-space:nowrap;transition:.3s}
+.rail-item i{font-style:normal;font-size:11px;opacity:.55}
+.rail-item:hover{color:#fff;border-color:rgba(255,255,255,.4);transform:translateY(-2px)}
+.rail-item.active{background:#fff;color:#050505;border-color:#fff;box-shadow:0 0 22px rgba(255,255,255,.2)}
+.carousel-hint{text-align:center;font-size:12px;color:#5f5f67;margin:10px 0 0}
+@media(max-width:620px){.tidy{grid-template-columns:repeat(8,13px);gap:8px}.tidy i{width:13px;height:13px}.carousel-hint{display:none}}
 </style>
 <script src="intro.js"></script>
 </head>
@@ -184,7 +225,7 @@ footer{padding:35px 0 0;color:var(--muted);font-size:13px;border-top:1px solid v
   <section id="projects"><div class="wrap">
     <div class="section-head reveal"><div class="pill">Selected work</div><h2>Featured projects</h2><p class="sub">Practical projects that demonstrate data ingestion, transformation, modelling and business reporting.</p></div>
     <div class="featured-carousel" aria-label="Featured projects carousel">
-      <div class="carousel-stage" id="project-stage">
+      <div class="carousel-stage" id="project-stage" tabindex="0" role="group" aria-roledescription="carousel" aria-label="Featured projects, use left and right arrow keys">
         <a class="showcase-card" data-project="0" href="Covid_case_study.html" aria-label="Open Azure COVID-19 Data Platform case study">
           <div class="showcase-art"><div class="art-orbit orbit-a"></div><div class="art-orbit orbit-b"></div><div class="art-core">☁</div><span class="art-label">AZURE · LAKEHOUSE</span><span class="art-pulse"></span></div>
           <div class="showcase-copy"><span class="showcase-kicker">01 / DATA ENGINEERING</span><h3>Azure COVID-19 Data Platform</h3><p>From raw files to a governed, analytics-ready lakehouse.</p><span class="showcase-tags">ADF · ADLS · Databricks · Unity Catalog</span><span class="showcase-cta">Read case study <b>↗</b></span></div>
@@ -197,8 +238,26 @@ footer{padding:35px 0 0;color:var(--muted);font-size:13px;border-top:1px solid v
           <div class="showcase-art"><div class="sales-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="sales-ring"></div><span class="art-label">SALES · TRENDS · KPI</span></div>
           <div class="showcase-copy"><span class="showcase-kicker">03 / ANALYTICS</span><h3>Sales Insights Dashboard</h3><p>Four years of sales data shaped into product, region and customer insights.</p><span class="showcase-tags">Power BI · DAX · Excel</span><span class="showcase-cta">Read case study <b>↗</b></span></div>
         </a>
+        <a class="showcase-card" data-project="3" href="fifa.html" aria-label="Open FIFA Player Attributes SQL project">
+          <div class="showcase-art"><svg class="radar" width="190" height="190" viewBox="0 0 200 200" aria-hidden="true"><g class="radar-spin"><polygon class="radar-grid" points="100,20 169.3,60 169.3,140 100,180 30.7,140 30.7,60"/><polygon class="radar-grid" points="100,47 145.9,73.5 145.9,126.5 100,153 54.1,126.5 54.1,73.5"/><polygon class="radar-grid" points="100,73 123.4,86.5 123.4,113.5 100,127 76.6,113.5 76.6,86.5"/><path class="radar-axis" d="M100 20V180M30.7 60 169.3 140M169.3 60 30.7 140"/><polygon class="radar-b" points="100,52 158.9,66 138.1,122 100,172 44.6,132 65.4,80"><animate attributeName="points" dur="7s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.5;1" keySplines=".4 0 .2 1;.4 0 .2 1" values="100,52 158.9,66 138.1,122 100,172 44.6,132 65.4,80;100,36 141.6,76 162.4,136 100,140 51.5,128 41.1,66;100,52 158.9,66 138.1,122 100,172 44.6,132 65.4,80"/></polygon><polygon class="radar-a" points="100,36 141.6,76 162.4,136 100,140 51.5,128 41.1,66"><animate attributeName="points" dur="7s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.5;1" keySplines=".4 0 .2 1;.4 0 .2 1" values="100,36 141.6,76 162.4,136 100,140 51.5,128 41.1,66;100,52 158.9,66 138.1,122 100,172 44.6,132 65.4,80;100,36 141.6,76 162.4,136 100,140 51.5,128 41.1,66"/></polygon></g></svg><span class="art-label">PLAYER DATA · SQL</span></div>
+          <div class="showcase-copy"><span class="showcase-kicker">04 / SQL EXPLORATION</span><h3>FIFA Player Attributes</h3><p>Player attributes and performance patterns explored through SQL.</p><span class="showcase-tags">SQL · EDA · Sports Data</span><span class="showcase-cta">View project <b>↗</b></span></div>
+        </a>
+        <a class="showcase-card" data-project="4" href="employee_cleaning.html" aria-label="Open Employee Data Transformation Python project">
+          <div class="showcase-art"><div class="tidy" id="tidy" aria-hidden="true"><span class="scan"></span></div><span class="art-label">RAW DATA → CLEAN DATA</span></div>
+          <div class="showcase-copy"><span class="showcase-kicker">05 / PYTHON</span><h3>Employee Data Transformation</h3><p>Raw employee records cleaned and validated into an analysis-ready dataset.</p><span class="showcase-tags">Python · Pandas · Data Cleaning</span><span class="showcase-cta">View project <b>↗</b></span></div>
+        </a>
+        <a class="showcase-card" data-project="5" href="sales_perfomance.html" aria-label="Open Powering Sales Growth dashboard">
+          <div class="showcase-art"><svg width="280" height="130" viewBox="0 0 300 140" aria-hidden="true"><circle class="donut-base" cx="70" cy="70" r="44"/><circle class="donut" cx="70" cy="70" r="44"/><path class="area" d="M140 110 175 92 205 100 240 60 285 42V128H140Z"/><polyline class="trend" pathLength="1" points="140,110 175,92 205,100 240,60 285,42"/></svg><span class="art-label">KPIS · TRENDS</span></div>
+          <div class="showcase-copy"><span class="showcase-kicker">06 / DECISION SUPPORT</span><h3>Powering Sales Growth</h3><p>Sales performance, key metrics and opportunities in one decision-ready view.</p><span class="showcase-tags">Power BI · SQL · Visualization</span><span class="showcase-cta">Read case study <b>↗</b></span></div>
+        </a>
+        <a class="showcase-card" data-project="6" href="bicycle.html" aria-label="Open Cycling Analytics project">
+          <div class="showcase-art"><svg width="270" height="135" viewBox="0 0 300 150" aria-hidden="true"><path class="route-base" d="M20 110C60 20 100 130 140 70S220 20 280 60"/><path class="route" pathLength="1" d="M20 110C60 20 100 130 140 70S220 20 280 60"/><circle class="rider" r="5"><animateMotion dur="5s" repeatCount="indefinite" keyPoints="0;1;1" keyTimes="0;.7;1" calcMode="linear" path="M20 110C60 20 100 130 140 70S220 20 280 60"/></circle></svg><span class="art-label">ACTIVITY · PERFORMANCE</span></div>
+          <div class="showcase-copy"><span class="showcase-kicker">07 / PERSONAL DATA</span><h3>Cycling Analytics</h3><p>Activity data turned into measurable insight on performance and consistency.</p><span class="showcase-tags">Data Analytics · Visualization · Trend Analysis</span><span class="showcase-cta">View project <b>↗</b></span></div>
+        </a>
       </div>
-      <div class="carousel-controls"><button class="carousel-arrow" id="project-prev" aria-label="Previous project">←</button><div class="carousel-dots"><button class="carousel-dot active" data-slide="0" aria-label="Project 1"></button><button class="carousel-dot" data-slide="1" aria-label="Project 2"></button><button class="carousel-dot" data-slide="2" aria-label="Project 3"></button></div><button class="carousel-arrow" id="project-next" aria-label="Next project">→</button><a class="btn btn-primary" href="Project.html">Explore my projects <span>↗</span></a></div>
+      <div class="carousel-controls"><button class="carousel-arrow" id="project-prev" aria-label="Previous project">←</button><div class="carousel-dots" id="project-dots" role="tablist" aria-label="Choose project"></div><button class="carousel-arrow" id="project-next" aria-label="Next project">→</button><a class="btn btn-primary" href="Project.html">Explore my projects <span>↗</span></a></div>
+      <div class="project-rail" id="project-rail" aria-label="Jump to a project"></div>
+      <p class="carousel-hint">Drag, swipe or scroll sideways · use ← → keys</p>
     </div>
   </div></section>
 
@@ -312,24 +371,100 @@ footer{padding:35px 0 0;color:var(--muted);font-size:13px;border-top:1px solid v
   if (reduce) for (let i = 0; i < 240; i++) step();
   else (function loop() { step(); requestAnimationFrame(loop); })();
 
-  // 3D featured-project carousel
+  // 3D featured-project carousel: swipe, sideways scroll, keys, rail, scroll-linked motion
+  const carousel = document.querySelector('.featured-carousel');
   const stage = document.getElementById('project-stage');
-  const cards = $('.showcase-card', stage), dots = $('.carousel-dot');
-  let current = 0, timer;
+  const cards = $('.showcase-card', stage), dotsBox = document.getElementById('project-dots'), rail = document.getElementById('project-rail');
+  const DUR = 6500; carousel.style.setProperty('--dur', DUR + 'ms');
+  let current = 0, timer, visible = false, hovering = false, dragged = false;
+
+  // build dots + rail from the cards
+  const dots = cards.map((c, i) => { const d = document.createElement('button'); d.className = 'carousel-dot'; d.setAttribute('role', 'tab'); d.setAttribute('aria-label', 'Project ' + (i + 1)); d.onclick = () => go(i); dotsBox.appendChild(d); return d; });
+  const chips = cards.map((c, i) => { const b = document.createElement('button'); b.className = 'rail-item'; b.innerHTML = `<i>${String(i + 1).padStart(2, '0')}</i>${c.querySelector('h3').textContent.replace('&amp;', '&')}`; b.onclick = () => go(i); rail.appendChild(b); return b; });
+
+  // employee dots: random "mess" offsets
+  const tidy = document.getElementById('tidy');
+  if (tidy) for (let i = 0; i < 32; i++) { const d = document.createElement('i'); d.style.cssText = `--i:${i % 8};--dx:${(Math.random() * 70 - 35) | 0}px;--dy:${(Math.random() * 60 - 30) | 0}px;--r:${(Math.random() * 120 - 60) | 0}deg`; tidy.appendChild(d); }
+  if (reduce) $('svg', stage).forEach(v => v.pauseAnimations && v.pauseAnimations());
+
+  const restartFill = () => { const d = dots[current]; d.classList.remove('active'); void d.offsetWidth; d.classList.add('active'); };
+  const schedule = () => { clearTimeout(timer); if (reduce || hovering || !visible) return; timer = setTimeout(() => go(current + 1), DUR); };
   const render = () => {
     cards.forEach((c, i) => {
       c.classList.remove('active', 'left', 'right', 'hidden-side');
       const d = (i - current + cards.length) % cards.length;
       c.classList.add(d === 0 ? 'active' : d === 1 ? 'right' : d === cards.length - 1 ? 'left' : 'hidden-side');
+      c.tabIndex = d === 0 ? 0 : -1;
     });
-    dots.forEach((x, i) => x.classList.toggle('active', i === current));
+    dots.forEach((x, i) => { x.classList.toggle('active', i === current); x.setAttribute('aria-selected', i === current); });
+    chips.forEach((x, i) => x.classList.toggle('active', i === current));
+    const ch = chips[current]; rail.scrollTo({ left: ch.offsetLeft - (rail.clientWidth - ch.offsetWidth) / 2, behavior: reduce ? 'auto' : 'smooth' });
   };
-  const go = n => { current = (n + cards.length) % cards.length; render(); };
+  const go = n => { current = (n + cards.length) % cards.length; render(); schedule(); };
   document.getElementById('project-prev').onclick = () => go(current - 1);
   document.getElementById('project-next').onclick = () => go(current + 1);
-  dots.forEach(d => d.onclick = () => go(+d.dataset.slide));
-  stage.addEventListener('click', e => { const c = e.target.closest('.showcase-card'); if (c && +c.dataset.project !== current) { e.preventDefault(); go(+c.dataset.project); } });
-  if (!reduce) { const start = () => timer = setInterval(() => go(current + 1), 6500); start(); stage.addEventListener('mouseenter', () => clearInterval(timer)); stage.addEventListener('mouseleave', start); }
+
+  // click a side card to bring it forward (ignore clicks that ended a drag)
+  stage.addEventListener('click', e => {
+    if (dragged) { e.preventDefault(); e.stopPropagation(); dragged = false; return; }
+    const c = e.target.closest('.showcase-card');
+    if (c && +c.dataset.project !== current) { e.preventDefault(); go(+c.dataset.project); }
+  }, true);
+  stage.addEventListener('dragstart', e => e.preventDefault());
+
+  // drag / swipe
+  let sx = null;
+  stage.addEventListener('pointerdown', e => { sx = e.clientX; dragged = false; });
+  addEventListener('pointermove', e => { if (sx !== null && Math.abs(e.clientX - sx) > 8) dragged = true; });
+  addEventListener('pointerup', e => {
+    if (sx === null) return;
+    const dx = e.clientX - sx; sx = null;
+    if (Math.abs(dx) > 50) go(current + (dx < 0 ? 1 : -1)); else dragged = false;
+  });
+  addEventListener('pointercancel', () => { sx = null; dragged = false; });
+
+  // sideways wheel / trackpad swipe (vertical scrolling is left alone)
+  let wheelLock = 0;
+  stage.addEventListener('wheel', e => {
+    const h = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : (e.shiftKey ? e.deltaY : 0);
+    if (Math.abs(h) < 12) return;
+    e.preventDefault();
+    const now = performance.now(); if (now - wheelLock < 650) return;
+    wheelLock = now; go(current + (h > 0 ? 1 : -1));
+  }, { passive: false });
+
+  // keyboard
+  stage.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') { e.preventDefault(); go(current + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); go(current - 1); }
+  });
+
+  // card spotlight
+  cards.forEach(c => c.addEventListener('pointermove', e => {
+    const r = c.getBoundingClientRect();
+    c.style.setProperty('--mx', (e.clientX - r.left) + 'px'); c.style.setProperty('--my', (e.clientY - r.top) + 'px');
+  }));
+
+  // pause on hover/focus
+  const pause = v => { hovering = v; carousel.classList.toggle('paused', v); if (!v) restartFill(); schedule(); };
+  stage.addEventListener('mouseenter', () => pause(true)); stage.addEventListener('mouseleave', () => pause(false));
+  stage.addEventListener('focusin', () => pause(true)); stage.addEventListener('focusout', () => pause(false));
+
+  // scroll-linked: cards fan in when the section arrives; glow + perspective drift with scroll
+  carousel.classList.add('pre');
+  const vis = new IntersectionObserver(([e]) => {
+    visible = e.isIntersecting;
+    if (visible && carousel.classList.contains('pre')) {
+      cards.forEach(c => c.style.transitionDelay = c.classList.contains('active') ? '0ms' : '160ms');
+      carousel.classList.remove('pre');
+      setTimeout(() => cards.forEach(c => c.style.transitionDelay = ''), 1300);
+    }
+    if (visible) { restartFill(); schedule(); } else clearTimeout(timer);
+    carousel.classList.toggle('paused', !visible || hovering);
+  }, { threshold: .3 });
+  vis.observe(carousel);
+  const drift = () => { const r = carousel.getBoundingClientRect(); carousel.style.setProperty('--sp', Math.max(0, Math.min(1, 1 - (r.top + r.height / 2) / (innerHeight + r.height / 2) )).toFixed(3)); };
+  addEventListener('scroll', drift, { passive: true }); drift();
   render();
 })();
 </script>
