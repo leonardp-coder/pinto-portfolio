@@ -183,6 +183,54 @@ footer{padding:35px 0 0;color:var(--muted);font-size:13px;border-top:1px solid v
 .rail-item.active{background:#fff;color:#050505;border-color:#fff;box-shadow:0 0 22px rgba(255,255,255,.2)}
 .carousel-hint{text-align:center;font-size:12px;color:#5f5f67;margin:10px 0 0}
 @media(max-width:620px){.tidy{grid-template-columns:repeat(8,13px);gap:8px}.tidy i{width:13px;height:13px}.carousel-hint{display:none}}
+/* explore-all button in section header */
+.projects-head{display:flex;align-items:flex-end;justify-content:space-between;gap:28px;flex-wrap:wrap}
+.explore-btn{position:relative;overflow:hidden;flex:none;display:inline-flex;align-items:center;gap:18px;padding:8px 8px 8px 28px;border-radius:999px;background:#fff;color:#050505;font:600 15px Inter,sans-serif;box-shadow:0 10px 40px rgba(255,255,255,.2),0 0 0 6px rgba(255,255,255,.06);transition:transform .3s cubic-bezier(.2,.75,.2,1),box-shadow .3s}
+.explore-btn:before{content:"";position:absolute;inset:-60% -30%;background:linear-gradient(100deg,transparent 40%,rgba(0,0,0,.09) 50%,transparent 60%);transform:translateX(-120%);animation:exploreSweep 4.5s ease-in-out infinite}
+.explore-btn:hover{transform:translateY(-4px);box-shadow:0 16px 54px rgba(255,255,255,.34),0 0 0 8px rgba(255,255,255,.09)}
+.explore-label{position:relative}
+.explore-arrow{position:relative;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#050505;color:#fff;font-size:19px;transition:transform .35s cubic-bezier(.2,.75,.2,1)}
+.explore-btn:hover .explore-arrow{transform:rotate(45deg) scale(1.08)}
+.explore-btn:focus-visible{outline:2px solid #fff;outline-offset:6px}
+@keyframes exploreSweep{0%,55%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+@media(max-width:700px){.projects-head{display:block}.explore-btn{margin-top:24px}}
+/* ===== redesigned project cards ===== */
+@property --ang{syntax:"<angle>";inherits:false;initial-value:0deg}
+.carousel-stage{height:660px}
+.showcase-card{width:min(470px,40vw);height:590px;background:radial-gradient(120% 55% at 50% 0,rgba(255,255,255,.08),transparent 62%),var(--card)}
+.showcase-card.active:after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;background:conic-gradient(from var(--ang),transparent 0 62%,rgba(255,255,255,.95) 82%,transparent 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);mask-composite:exclude;pointer-events:none;z-index:4;animation:borderSpin 6s linear infinite}
+@keyframes borderSpin{to{--ang:360deg}}
+.showcase-art{height:290px;isolation:isolate;background:radial-gradient(circle at 50% 46%,rgba(255,255,255,.17),transparent 60%),#0d0d0f}
+.showcase-art:before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(rgba(255,255,255,.17) 1px,transparent 1px) 0 0/22px 22px;-webkit-mask-image:radial-gradient(ellipse at center,#000 8%,transparent 72%);mask-image:radial-gradient(ellipse at center,#000 8%,transparent 72%);animation:gridDrift 18s linear infinite}
+@keyframes gridDrift{to{background-position:44px 22px}}
+.showcase-art>*{transition:transform .7s cubic-bezier(.2,.75,.2,1)}
+.showcase-card.active:hover .showcase-art>*:not(.art-label):not(.status-chip):not(.ghost-num):not(.float-chip){transform:scale(1.06)}
+.ghost-num{position:absolute;top:10px;right:20px;z-index:2;font:700 70px/1 "Inter Tight",Inter,sans-serif;letter-spacing:-.05em;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.2);pointer-events:none;user-select:none}
+.status-chip{position:absolute;top:20px;left:20px;z-index:2;display:inline-flex;align-items:center;gap:8px;padding:5px 12px 5px 10px;border:1px solid var(--line2);border-radius:999px;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);font-size:11.5px;font-weight:500;color:var(--silver)}
+.status-chip i{width:6px;height:6px;border-radius:50%;background:#fff;box-shadow:0 0 9px #fff}
+.status-chip.wip i{animation:dotBlink 1.6s ease-in-out infinite}
+@keyframes dotBlink{50%{opacity:.25}}
+.float-chip{position:absolute;z-index:2;padding:6px 13px;border-radius:999px;border:1px solid var(--line2);background:rgba(16,16,17,.88);backdrop-filter:blur(8px);font-size:11.5px;font-weight:500;color:var(--silver);white-space:nowrap;box-shadow:0 10px 26px rgba(0,0,0,.55);animation:chipFloat 5.5s ease-in-out infinite}
+.float-chip.c1{left:18px;top:46%}.float-chip.c2{right:18px;top:54%;animation-delay:-2s}.float-chip.c3{right:20px;bottom:20px;animation-delay:-3.5s}
+@keyframes chipFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.showcase-copy{padding:24px 28px 26px}
+.showcase-kicker{display:inline-flex;align-items:center;gap:10px}
+.showcase-kicker:before{content:"";width:22px;height:1px;background:linear-gradient(90deg,#fff,transparent)}
+.showcase-copy h3{font-size:27px;margin:12px 0 10px}
+.showcase-tags{display:flex;flex-wrap:wrap;gap:7px;border-top:1px solid var(--line);padding-top:16px}
+.tchip{font-size:12px;color:var(--silver);padding:4px 12px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.035);transition:transform .3s,border-color .3s,background .3s}
+.showcase-card.active:hover .tchip{transform:translateY(-3px);border-color:var(--line2);background:rgba(255,255,255,.08)}
+.showcase-card.active:hover .tchip:nth-child(2){transition-delay:50ms}.showcase-card.active:hover .tchip:nth-child(3){transition-delay:100ms}.showcase-card.active:hover .tchip:nth-child(4){transition-delay:150ms}
+.showcase-cta{margin-top:18px;padding:6px 6px 6px 20px;border:1px solid var(--line2);border-radius:999px;background:rgba(255,255,255,.04);transition:background .35s,color .35s,border-color .35s}
+.showcase-cta b{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:17px;background:rgba(255,255,255,.1);transition:transform .4s cubic-bezier(.2,.75,.2,1),background .35s,color .35s}
+.showcase-card:hover .showcase-cta b{transform:none}
+.showcase-card.active:hover .showcase-cta:not(.muted-cta){background:#fff;color:#050505;border-color:#fff}
+.showcase-card.active:hover .showcase-cta:not(.muted-cta) b{background:#050505;color:#fff;transform:rotate(45deg)}
+.showcase-cta.muted-cta{border-style:dashed;background:transparent}
+@media(max-width:900px){.carousel-stage{height:650px}.showcase-card{width:min(440px,65vw)}}
+@media(max-width:620px){.carousel-stage{height:640px}.showcase-card{width:calc(100% - 34px);height:580px}.showcase-art{height:235px}.float-chip{display:none}.ghost-num{font-size:54px}.showcase-copy{padding:20px}.showcase-copy h3{font-size:24px}}
+.project-rail{padding-left:max(4px,6vw);padding-right:max(4px,6vw)}
+@media(prefers-reduced-motion:reduce){.showcase-card.active:after{animation:none}}
 </style>
 <script src="intro.js"></script>
 </head>
@@ -223,7 +271,10 @@ footer{padding:35px 0 0;color:var(--muted);font-size:13px;border-top:1px solid v
   </div>
 
   <section id="projects"><div class="wrap">
-    <div class="section-head reveal"><div class="pill">Selected work</div><h2>Featured projects</h2><p class="sub">Practical projects that demonstrate data ingestion, transformation, modelling and business reporting.</p></div>
+    <div class="section-head projects-head reveal">
+      <div><div class="pill">Selected work</div><h2>Featured projects</h2><p class="sub">Practical projects that demonstrate data ingestion, transformation, modelling and business reporting.</p></div>
+      <a class="explore-btn" href="Project.html" aria-label="Explore all projects"><span class="explore-label">Explore all projects</span><span class="explore-arrow" aria-hidden="true">↗</span></a>
+    </div>
     <div class="featured-carousel" aria-label="Featured projects carousel">
       <div class="carousel-stage" id="project-stage" tabindex="0" role="group" aria-roledescription="carousel" aria-label="Featured projects, use left and right arrow keys">
         <a class="showcase-card" data-project="0" href="Covid_case_study.html" aria-label="Open Azure COVID-19 Data Platform case study">
@@ -255,7 +306,7 @@ footer{padding:35px 0 0;color:var(--muted);font-size:13px;border-top:1px solid v
           <div class="showcase-copy"><span class="showcase-kicker">07 / PERSONAL DATA</span><h3>Cycling Analytics</h3><p>Activity data turned into measurable insight on performance and consistency.</p><span class="showcase-tags">Data Analytics · Visualization · Trend Analysis</span><span class="showcase-cta">View project <b>↗</b></span></div>
         </a>
       </div>
-      <div class="carousel-controls"><button class="carousel-arrow" id="project-prev" aria-label="Previous project">←</button><div class="carousel-dots" id="project-dots" role="tablist" aria-label="Choose project"></div><button class="carousel-arrow" id="project-next" aria-label="Next project">→</button><a class="btn btn-primary" href="Project.html">Explore my projects <span>↗</span></a></div>
+      <div class="carousel-controls"><button class="carousel-arrow" id="project-prev" aria-label="Previous project">←</button><div class="carousel-dots" id="project-dots" role="tablist" aria-label="Choose project"></div><button class="carousel-arrow" id="project-next" aria-label="Next project">→</button></div>
       <div class="project-rail" id="project-rail" aria-label="Jump to a project"></div>
       <p class="carousel-hint">Drag, swipe or scroll sideways · use ← → keys</p>
     </div>
@@ -377,6 +428,17 @@ footer{padding:35px 0 0;color:var(--muted);font-size:13px;border-top:1px solid v
   const cards = $('.showcase-card', stage), dotsBox = document.getElementById('project-dots'), rail = document.getElementById('project-rail');
   const DUR = 6500; carousel.style.setProperty('--dur', DUR + 'ms');
   let current = 0, timer, visible = false, hovering = false, dragged = false;
+
+  // card enhancements: ghost number, status chip, floating tech chips, tag pills
+  cards.forEach((c, i) => {
+    const art = c.querySelector('.showcase-art'), cta = c.querySelector('.showcase-cta'), tags = c.querySelector('.showcase-tags');
+    const label = cta.textContent.toLowerCase();
+    const wip = label.includes('coming soon');
+    const status = wip ? 'In progress' : label.includes('case study') ? 'Case study' : 'Project';
+    const items = tags.textContent.split('·').map(t => t.trim()).filter(Boolean);
+    art.insertAdjacentHTML('beforeend', `<span class="status-chip${wip ? ' wip' : ''}"><i></i>${status}</span><span class="ghost-num" aria-hidden="true">${String(i + 1).padStart(2, '0')}</span>` + items.slice(0, 3).map((t, k) => `<span class="float-chip c${k + 1}" aria-hidden="true">${t}</span>`).join(''));
+    tags.innerHTML = items.map(t => `<span class="tchip">${t}</span>`).join('');
+  });
 
   // build dots + rail from the cards
   const dots = cards.map((c, i) => { const d = document.createElement('button'); d.className = 'carousel-dot'; d.setAttribute('role', 'tab'); d.setAttribute('aria-label', 'Project ' + (i + 1)); d.onclick = () => go(i); dotsBox.appendChild(d); return d; });
